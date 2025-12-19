@@ -83,6 +83,14 @@ public class VaiTroServiceImpl implements VaiTroService {
         vaiTroRepository.save(vaiTro);
     }
 
+    // Khôi phục vai trò
+    public void restoreVaiTro(Integer maVaiTro) {
+        VaiTro vaiTro = vaiTroRepository.findById(maVaiTro)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy vai trò với mã: " + maVaiTro));
+        vaiTro.setDaXoa(false);
+        vaiTroRepository.save(vaiTro);
+    }
+
     @Override
     @Transactional(readOnly = true)
     public boolean isVaiTroExists(String tenVaiTro) {

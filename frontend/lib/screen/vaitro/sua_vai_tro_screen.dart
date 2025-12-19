@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../model/vaitro/vai_tro.dart';
-import '../services/vaitro/vai_tro_service.dart';
+import '../../model/vaitro/vai_tro.dart';
+import '../../services/vaitro/vai_tro_service.dart';
 
 class SuaVaiTroScreen extends StatefulWidget {
   final VaiTro vaiTro;

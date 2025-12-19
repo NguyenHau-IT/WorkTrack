@@ -28,6 +28,16 @@ public class VaiTroController {
     @GetMapping
     @Operation(summary = "Lấy danh sách tất cả vai trò")
     public ResponseEntity<List<VaiTro>> getAllVaiTro() {
+        List<VaiTro> vaiTros = vaiTroService.getAllVaiTro();
+        return ResponseEntity.ok(vaiTros);
+    }
+
+    /**
+     * Lấy tất cả vai trò chưa bị xóa
+     */
+    @GetMapping("/chua-xoa")
+    @Operation(summary = "Lấy danh sách tất cả vai trò chưa bị xóa")
+    public ResponseEntity<List<VaiTro>> getAllVaiTroChuaXoa() {
         List<VaiTro> vaiTros = vaiTroService.getAllVaiTroChuaXoa();
         return ResponseEntity.ok(vaiTros);
     }
@@ -97,6 +107,21 @@ public class VaiTroController {
         try {
             vaiTroService.deleteVaiTro(maVaiTro);
             return ResponseEntity.ok(Map.of("message", "Xóa vai trò thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Khôi phục vai trò
+     */
+    @PutMapping("/restore/{maVaiTro}")
+    @Operation(summary = "Khôi phục vai trò")
+    public ResponseEntity<?> restoreVaiTro(@PathVariable Integer maVaiTro) {
+        try {
+            vaiTroService.restoreVaiTro(maVaiTro);
+            return ResponseEntity.ok(Map.of("message", "Khôi phục vai trò thành công"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("message", e.getMessage()));
