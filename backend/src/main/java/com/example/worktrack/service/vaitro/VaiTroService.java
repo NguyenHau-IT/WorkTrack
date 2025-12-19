@@ -43,6 +43,11 @@ public interface VaiTroService {
     void deleteVaiTro(Integer maVaiTro);
 
     /**
+     * Khôi phục vai trò
+     */
+    void restoreVaiTro(Integer maVaiTro);
+
+    /**
      * Kiểm tra vai trò đã tồn tại
      */
     boolean isVaiTroExists(String tenVaiTro);
