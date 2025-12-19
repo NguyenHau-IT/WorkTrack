@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../model/vaitro/vai_tro.dart';
-import '../services/vaitro/vai_tro_service.dart';
+import '../../model/vaitro/vai_tro.dart';
+import '../../services/vaitro/vai_tro_service.dart';
 import 'them_vai_tro_screen.dart';
 import 'sua_vai_tro_screen.dart';
 
