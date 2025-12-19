@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screen/danh_sach_vai_tro_screen.dart';
+import 'screen/vaitro/danh_sach_vai_tro_screen.dart';
 
 void main() {
   runApp(const MyApp());
