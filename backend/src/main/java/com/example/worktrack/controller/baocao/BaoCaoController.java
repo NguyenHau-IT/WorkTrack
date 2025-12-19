@@ -1,0 +1,239 @@
+package com.example.worktrack.controller.baocao;
+
+import com.example.worktrack.model.baocao.BaoCao;
+import com.example.worktrack.service.baocao.BaoCaoService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/v1/baocao")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class BaoCaoController {
+
+    private final BaoCaoService baoCaoService;
+
+    /**
+     * Lấy tất cả báo cáo
+     */
+    @GetMapping
+    public ResponseEntity<List<BaoCao>> getAllBaoCao() {
+        List<BaoCao> baoCaos = baoCaoService.getAllBaoCao();
+        return ResponseEntity.ok(baoCaos);
+    }
+
+    /**
+     * Lấy báo cáo theo ID
+     */
+    @GetMapping("/{maBaoCao}")
+    public ResponseEntity<?> getBaoCaoById(@PathVariable Integer maBaoCao) {
+        Optional<BaoCao> baoCaoOpt = baoCaoService.getBaoCaoById(maBaoCao);
+
+        if (baoCaoOpt.isPresent()) {
+            return ResponseEntity.ok(baoCaoOpt.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Không tìm thấy báo cáo với mã: " + maBaoCao));
+        }
+    }
+
+    /**
+     * Lấy báo cáo của nhân viên
+     */
+    @GetMapping("/nhanvien/{maNV}")
+    public ResponseEntity<List<BaoCao>> getBaoCaoByNhanVien(@PathVariable Integer maNV) {
+        List<BaoCao> baoCaos = baoCaoService.getBaoCaoByMaNV(maNV);
+        return ResponseEntity.ok(baoCaos);
+    }
+
+    /**
+     * Lấy báo cáo của nhân viên theo khoảng thời gian
+     */
+    @GetMapping("/nhanvien/{maNV}/daterange")
+    public ResponseEntity<List<BaoCao>> getBaoCaoByNhanVienAndDateRange(
+            @PathVariable Integer maNV,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tuNgay,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate denNgay) {
+        List<BaoCao> baoCaos = baoCaoService.getBaoCaoByMaNVAndDateRange(maNV, tuNgay, denNgay);
+        return ResponseEntity.ok(baoCaos);
+    }
+
+    /**
+     * Lấy báo cáo theo khoảng thời gian
+     */
+    @GetMapping("/daterange")
+    public ResponseEntity<List<BaoCao>> getBaoCaoByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tuNgay,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate denNgay) {
+        List<BaoCao> baoCaos = baoCaoService.getBaoCaoByDateRange(tuNgay, denNgay);
+        return ResponseEntity.ok(baoCaos);
+    }
+
+    /**
+     * Lấy báo cáo của nhân viên theo tháng
+     */
+    @GetMapping("/nhanvien/{maNV}/thang")
+    public ResponseEntity<List<BaoCao>> getBaoCaoByMonth(
+            @PathVariable Integer maNV,
+            @RequestParam int nam,
+            @RequestParam int thang) {
+        List<BaoCao> baoCaos = baoCaoService.getBaoCaoByMonth(maNV, nam, thang);
+        return ResponseEntity.ok(baoCaos);
+    }
+
+    /**
+     * Lấy báo cáo theo năm
+     */
+    @GetMapping("/nam/{nam}")
+    public ResponseEntity<List<BaoCao>> getBaoCaoByYear(@PathVariable int nam) {
+        List<BaoCao> baoCaos = baoCaoService.getBaoCaoByYear(nam);
+        return ResponseEntity.ok(baoCaos);
+    }
+
+    /**
+     * Tạo báo cáo thủ công
+     */
+    @PostMapping
+    public ResponseEntity<?> createBaoCao(@Valid @RequestBody BaoCao baoCao) {
+        try {
+            BaoCao createdBaoCao = baoCaoService.createBaoCao(baoCao);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdBaoCao);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Tự động tạo báo cáo từ dữ liệu chấm công
+     */
+    @PostMapping("/generate")
+    public ResponseEntity<?> generateBaoCao(@RequestBody Map<String, Object> request) {
+        try {
+            Integer maNV = (Integer) request.get("maNV");
+            LocalDate tuNgay = LocalDate.parse((String) request.get("tuNgay"));
+            LocalDate denNgay = LocalDate.parse((String) request.get("denNgay"));
+
+            BaoCao baoCao = baoCaoService.generateBaoCao(maNV, tuNgay, denNgay);
+            return ResponseEntity.status(HttpStatus.CREATED).body(baoCao);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Lỗi khi tạo báo cáo: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Cập nhật báo cáo
+     */
+    @PutMapping("/{maBaoCao}")
+    public ResponseEntity<?> updateBaoCao(
+            @PathVariable Integer maBaoCao,
+            @Valid @RequestBody BaoCao baoCao) {
+        try {
+            BaoCao updatedBaoCao = baoCaoService.updateBaoCao(maBaoCao, baoCao);
+            return ResponseEntity.ok(updatedBaoCao);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Xóa báo cáo
+     */
+    @DeleteMapping("/{maBaoCao}")
+    public ResponseEntity<?> deleteBaoCao(@PathVariable Integer maBaoCao) {
+        try {
+            baoCaoService.deleteBaoCao(maBaoCao);
+            return ResponseEntity.ok(Map.of("message", "Xóa báo cáo thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Tính lương cho báo cáo
+     */
+    @PatchMapping("/{maBaoCao}/luong")
+    public ResponseEntity<?> calculateLuong(
+            @PathVariable Integer maBaoCao,
+            @RequestBody Map<String, Object> request) {
+        try {
+            BigDecimal luongCoBan = new BigDecimal(request.get("luongCoBan").toString());
+            BigDecimal luongLamThem = new BigDecimal(request.get("luongLamThem").toString());
+
+            BaoCao updatedBaoCao = baoCaoService.calculateLuong(maBaoCao, luongCoBan, luongLamThem);
+            return ResponseEntity.ok(updatedBaoCao);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Lỗi khi tính lương: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Lấy tổng lương của nhân viên trong năm
+     */
+    @GetMapping("/nhanvien/{maNV}/tongluong")
+    public ResponseEntity<Map<String, Object>> getTotalSalaryByYear(
+            @PathVariable Integer maNV,
+            @RequestParam int nam) {
+        BigDecimal tongLuong = baoCaoService.getTotalSalaryByYear(maNV, nam);
+        return ResponseEntity.ok(Map.of(
+                "maNV", maNV,
+                "nam", nam,
+                "tongLuong", tongLuong));
+    }
+
+    /**
+     * Lấy tổng giờ làm của nhân viên trong năm
+     */
+    @GetMapping("/nhanvien/{maNV}/tonggio")
+    public ResponseEntity<Map<String, Object>> getTotalHoursByYear(
+            @PathVariable Integer maNV,
+            @RequestParam int nam) {
+        BigDecimal tongGio = baoCaoService.getTotalHoursByYear(maNV, nam);
+        return ResponseEntity.ok(Map.of(
+                "maNV", maNV,
+                "nam", nam,
+                "tongGio", tongGio));
+    }
+
+    /**
+     * Lấy báo cáo mới nhất của nhân viên
+     */
+    @GetMapping("/nhanvien/{maNV}/latest")
+    public ResponseEntity<?> getLatestBaoCao(@PathVariable Integer maNV) {
+        return baoCaoService.getLatestBaoCao(maNV)
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "Không tìm thấy báo cáo của nhân viên")));
+    }
+
+    /**
+     * Lấy thống kê tổng quan
+     */
+    @GetMapping("/thongke")
+    public ResponseEntity<Map<String, Object>> getOverallStatistics(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tuNgay,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate denNgay) {
+        Map<String, Object> statistics = baoCaoService.getOverallStatistics(tuNgay, denNgay);
+        return ResponseEntity.ok(statistics);
+    }
+}
