@@ -2,6 +2,9 @@ package com.example.worktrack.controller.cauhinhluong;
 
 import com.example.worktrack.model.cauhinhluong.CauHinhLuong;
 import com.example.worktrack.service.cauhinhluong.CauHinhLuongService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/cauhinhluong")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "Cấu Hình Lương", description = "API quản lý cấu hình lương")
 public class CauHinhLuongController {
 
     private final CauHinhLuongService cauHinhLuongService;
@@ -24,6 +28,7 @@ public class CauHinhLuongController {
      * Lấy tất cả cấu hình lương
      */
     @GetMapping
+    @Operation(summary = "Lấy tất cả cấu hình lương")
     public ResponseEntity<List<CauHinhLuong>> getAllCauHinhLuong() {
         List<CauHinhLuong> cauHinhLuongs = cauHinhLuongService.getAllCauHinhLuong();
         return ResponseEntity.ok(cauHinhLuongs);
@@ -33,6 +38,7 @@ public class CauHinhLuongController {
      * Lấy cấu hình lương theo ID
      */
     @GetMapping("/{maCauHinh}")
+    @Operation(summary = "Lấy cấu hình lương theo mã")
     public ResponseEntity<?> getCauHinhLuongById(@PathVariable Integer maCauHinh) {
         Optional<CauHinhLuong> cauHinhOpt = cauHinhLuongService.getCauHinhLuongById(maCauHinh);
 
@@ -46,6 +52,7 @@ public class CauHinhLuongController {
     }
 
     @GetMapping("/active")
+    @Operation(summary = "Lấy cấu hình lương đang hoạt động (mới nhất)")
     public ResponseEntity<?> getActiveCauHinhLuong() {
         Optional<CauHinhLuong> activeCauHinh = cauHinhLuongService.getActiveCauHinhLuong();
 
@@ -62,6 +69,7 @@ public class CauHinhLuongController {
      * Tạo cấu hình lương mới
      */
     @PostMapping
+    @Operation(summary = "Tạo cấu hình lương mới")
     public ResponseEntity<?> createCauHinhLuong(@Valid @RequestBody CauHinhLuong cauHinhLuong) {
         try {
             CauHinhLuong createdCauHinh = cauHinhLuongService.createCauHinhLuong(cauHinhLuong);
@@ -76,6 +84,7 @@ public class CauHinhLuongController {
      * Cập nhật cấu hình lương
      */
     @PutMapping("/{maCauHinh}")
+    @Operation(summary = "Cập nhật cấu hình lương")
     public ResponseEntity<?> updateCauHinhLuong(
             @PathVariable Integer maCauHinh,
             @Valid @RequestBody CauHinhLuong cauHinhLuong) {
@@ -92,6 +101,7 @@ public class CauHinhLuongController {
      * Xóa cấu hình lương
      */
     @DeleteMapping("/{maCauHinh}")
+    @Operation(summary = "Xóa cấu hình lương")
     public ResponseEntity<?> deleteCauHinhLuong(@PathVariable Integer maCauHinh) {
         try {
             cauHinhLuongService.deleteCauHinhLuong(maCauHinh);

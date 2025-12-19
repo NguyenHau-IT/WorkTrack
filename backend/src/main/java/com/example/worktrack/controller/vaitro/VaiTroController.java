@@ -28,7 +28,7 @@ public class VaiTroController {
     @GetMapping
     @Operation(summary = "Lấy danh sách tất cả vai trò")
     public ResponseEntity<List<VaiTro>> getAllVaiTro() {
-        List<VaiTro> vaiTros = vaiTroService.getAllVaiTro();
+        List<VaiTro> vaiTros = vaiTroService.getAllVaiTroChuaXoa();
         return ResponseEntity.ok(vaiTros);
     }
 

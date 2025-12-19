@@ -211,12 +211,27 @@ class _DanhSachVaiTroScreenState extends State<DanhSachVaiTroScreen> {
                       'Không có mô tả',
                       style: TextStyle(fontStyle: FontStyle.italic),
                     ),
-              trailing: Text(
-                'ID: ${vaiTro.maVaiTro}',
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 12,
-                ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.orange),
+                    tooltip: 'Sửa',
+                    onPressed: () => _navigateToSuaVaiTro(vaiTro),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    tooltip: 'Xóa',
+                    onPressed: () => _xoaVaiTro(vaiTro),
+                  ),
+                  Text(
+                    'ID: \\${vaiTro.maVaiTro}',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ),
           );

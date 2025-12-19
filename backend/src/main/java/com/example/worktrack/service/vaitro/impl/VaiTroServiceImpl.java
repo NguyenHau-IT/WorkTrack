@@ -23,6 +23,13 @@ public class VaiTroServiceImpl implements VaiTroService {
         return vaiTroRepository.findAll();
     }
 
+    // lấy tất cả vai trò chưa bị xóa
+    public List<VaiTro> getAllVaiTroChuaXoa() {
+        return vaiTroRepository.findAll().stream()
+                .filter(vaiTro -> !Boolean.TRUE.equals(vaiTro.getDaXoa()))
+                .toList();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Optional<VaiTro> getVaiTroById(Integer maVaiTro) {

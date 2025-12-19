@@ -3,6 +3,8 @@ package com.example.worktrack.controller.nhanvien;
 import com.example.worktrack.model.nhanvien.NhanVien;
 import com.example.worktrack.service.nhanvien.NhanVienService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/nhanvien")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "Nhân Viên", description = "API quản lý nhân viên")
 public class NhanVienController {
 
     private final NhanVienService nhanVienService;
@@ -25,6 +28,7 @@ public class NhanVienController {
      * Lấy tất cả nhân viên
      */
     @GetMapping
+    @Operation(summary = "Lấy danh sách tất cả nhân viên")
     public ResponseEntity<List<NhanVien>> getAllNhanVien() {
         List<NhanVien> nhanViens = nhanVienService.getAllNhanVien();
         return ResponseEntity.ok(nhanViens);
@@ -34,6 +38,7 @@ public class NhanVienController {
      * Lấy nhân viên theo ID
      */
     @GetMapping("/{maNV}")
+    @Operation(summary = "Lấy nhân viên theo mã")
     public ResponseEntity<?> getNhanVienById(@PathVariable Integer maNV) {
         Optional<NhanVien> nhanVienOpt = nhanVienService.getNhanVienById(maNV);
 
@@ -49,6 +54,7 @@ public class NhanVienController {
      * Lấy nhân viên theo email
      */
     @GetMapping("/email/{email}")
+    @Operation(summary = "Lấy nhân viên theo email")
     public ResponseEntity<?> getNhanVienByEmail(@PathVariable String email) {
         Optional<NhanVien> nhanVienOpt = nhanVienService.getNhanVienByEmail(email);
 
@@ -64,6 +70,7 @@ public class NhanVienController {
      * Lấy nhân viên theo thẻ NFC
      */
     @GetMapping("/nfc/{theNFC}")
+    @Operation(summary = "Lấy nhân viên theo thẻ NFC")
     public ResponseEntity<?> getNhanVienByTheNFC(@PathVariable String theNFC) {
         Optional<NhanVien> nhanVienOpt = nhanVienService.getNhanVienByTheNFC(theNFC);
 
@@ -79,6 +86,7 @@ public class NhanVienController {
      * Tìm kiếm nhân viên theo tên
      */
     @GetMapping("/search")
+    @Operation(summary = "Tìm kiếm nhân viên theo tên")
     public ResponseEntity<List<NhanVien>> searchNhanVien(@RequestParam String keyword) {
         List<NhanVien> nhanViens = nhanVienService.searchNhanVienByName(keyword);
         return ResponseEntity.ok(nhanViens);
@@ -88,6 +96,7 @@ public class NhanVienController {
      * Lấy nhân viên theo mã vai trò
      */
     @GetMapping("/vaitro/{maVaiTro}")
+    @Operation(summary = "Lấy nhân viên theo mã vai trò")
     public ResponseEntity<List<NhanVien>> getNhanVienByVaiTro(@PathVariable Integer maVaiTro) {
         List<NhanVien> nhanViens = nhanVienService.getNhanVienByMaVaiTro(maVaiTro);
         return ResponseEntity.ok(nhanViens);
@@ -97,6 +106,7 @@ public class NhanVienController {
      * Tạo mới nhân viên
      */
     @PostMapping
+    @Operation(summary = "Tạo mới nhân viên")
     public ResponseEntity<?> createNhanVien(@Valid @RequestBody NhanVien nhanVien) {
         try {
             NhanVien createdNhanVien = nhanVienService.createNhanVien(nhanVien);
@@ -111,6 +121,7 @@ public class NhanVienController {
      * Cập nhật thông tin nhân viên
      */
     @PutMapping("/{maNV}")
+    @Operation(summary = "Cập nhật thông tin nhân viên")
     public ResponseEntity<?> updateNhanVien(
             @PathVariable Integer maNV,
             @Valid @RequestBody NhanVien nhanVien) {
@@ -127,6 +138,7 @@ public class NhanVienController {
      * Xóa nhân viên
      */
     @DeleteMapping("/{maNV}")
+    @Operation(summary = "Xóa nhân viên")
     public ResponseEntity<?> deleteNhanVien(@PathVariable Integer maNV) {
         try {
             nhanVienService.deleteNhanVien(maNV);
@@ -141,6 +153,7 @@ public class NhanVienController {
      * Kiểm tra email đã tồn tại
      */
     @GetMapping("/check-email/{email}")
+    @Operation(summary = "Kiểm tra email đã tồn tại")
     public ResponseEntity<Map<String, Boolean>> checkEmailExists(@PathVariable String email) {
         boolean exists = nhanVienService.isEmailExists(email);
         return ResponseEntity.ok(Map.of("exists", exists));
@@ -150,6 +163,7 @@ public class NhanVienController {
      * Kiểm tra thẻ NFC đã tồn tại
      */
     @GetMapping("/check-nfc/{theNFC}")
+    @Operation(summary = "Kiểm tra thẻ NFC đã tồn tại")
     public ResponseEntity<Map<String, Boolean>> checkTheNFCExists(@PathVariable String theNFC) {
         boolean exists = nhanVienService.isTheNFCExists(theNFC);
         return ResponseEntity.ok(Map.of("exists", exists));
@@ -159,6 +173,7 @@ public class NhanVienController {
      * Cập nhật thẻ NFC
      */
     @PatchMapping("/{maNV}/nfc")
+    @Operation(summary = "Cập nhật thẻ NFC")
     public ResponseEntity<?> updateTheNFC(
             @PathVariable Integer maNV,
             @RequestBody Map<String, String> request) {
@@ -177,6 +192,7 @@ public class NhanVienController {
      * Endpoint này nhận dữ liệu vân tay dưới dạng Base64 string
      */
     @PatchMapping("/{maNV}/vantay")
+    @Operation(summary = "Cập nhật vân tay")
     public ResponseEntity<?> updateVanTay(
             @PathVariable Integer maNV,
             @RequestBody Map<String, String> request) {
@@ -196,6 +212,7 @@ public class NhanVienController {
      * Endpoint này nhận dữ liệu khuôn mặt dưới dạng Base64 string
      */
     @PatchMapping("/{maNV}/khuonmat")
+    @Operation(summary = "Cập nhật khuôn mặt")
     public ResponseEntity<?> updateKhuonMat(
             @PathVariable Integer maNV,
             @RequestBody Map<String, String> request) {

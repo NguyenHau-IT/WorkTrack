@@ -13,6 +13,11 @@ public interface VaiTroService {
     List<VaiTro> getAllVaiTro();
 
     /**
+     * Lấy tất cả vai trò chưa bị xóa
+     */
+    List<VaiTro> getAllVaiTroChuaXoa();
+
+    /**
      * Lấy vai trò theo mã
      */
     Optional<VaiTro> getVaiTroById(Integer maVaiTro);
