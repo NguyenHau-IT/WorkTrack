@@ -2,6 +2,9 @@ package com.example.worktrack.controller.baocao;
 
 import com.example.worktrack.model.baocao.BaoCao;
 import com.example.worktrack.service.baocao.BaoCaoService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,6 +22,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/baocao")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "Báo Cáo", description = "API quản lý báo cáo")
 public class BaoCaoController {
 
     private final BaoCaoService baoCaoService;
@@ -27,6 +31,7 @@ public class BaoCaoController {
      * Lấy tất cả báo cáo
      */
     @GetMapping
+    @Operation(summary = "Lấy tất cả báo cáo")
     public ResponseEntity<List<BaoCao>> getAllBaoCao() {
         List<BaoCao> baoCaos = baoCaoService.getAllBaoCao();
         return ResponseEntity.ok(baoCaos);
@@ -36,6 +41,7 @@ public class BaoCaoController {
      * Lấy báo cáo theo ID
      */
     @GetMapping("/{maBaoCao}")
+    @Operation(summary = "Lấy báo cáo theo mã")
     public ResponseEntity<?> getBaoCaoById(@PathVariable Integer maBaoCao) {
         Optional<BaoCao> baoCaoOpt = baoCaoService.getBaoCaoById(maBaoCao);
 
@@ -51,6 +57,7 @@ public class BaoCaoController {
      * Lấy báo cáo của nhân viên
      */
     @GetMapping("/nhanvien/{maNV}")
+    @Operation(summary = "Lấy báo cáo của nhân viên")
     public ResponseEntity<List<BaoCao>> getBaoCaoByNhanVien(@PathVariable Integer maNV) {
         List<BaoCao> baoCaos = baoCaoService.getBaoCaoByMaNV(maNV);
         return ResponseEntity.ok(baoCaos);
@@ -60,6 +67,7 @@ public class BaoCaoController {
      * Lấy báo cáo của nhân viên theo khoảng thời gian
      */
     @GetMapping("/nhanvien/{maNV}/daterange")
+    @Operation(summary = "Lấy báo cáo của nhân viên theo khoảng thời gian")
     public ResponseEntity<List<BaoCao>> getBaoCaoByNhanVienAndDateRange(
             @PathVariable Integer maNV,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tuNgay,
@@ -72,6 +80,7 @@ public class BaoCaoController {
      * Lấy báo cáo theo khoảng thời gian
      */
     @GetMapping("/daterange")
+    @Operation(summary = "Lấy báo cáo theo khoảng thời gian")
     public ResponseEntity<List<BaoCao>> getBaoCaoByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tuNgay,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate denNgay) {
@@ -83,6 +92,7 @@ public class BaoCaoController {
      * Lấy báo cáo của nhân viên theo tháng
      */
     @GetMapping("/nhanvien/{maNV}/thang")
+    @Operation(summary = "Lấy báo cáo của nhân viên theo tháng")
     public ResponseEntity<List<BaoCao>> getBaoCaoByMonth(
             @PathVariable Integer maNV,
             @RequestParam int nam,
@@ -95,6 +105,7 @@ public class BaoCaoController {
      * Lấy báo cáo theo năm
      */
     @GetMapping("/nam/{nam}")
+    @Operation(summary = "Lấy báo cáo theo năm")
     public ResponseEntity<List<BaoCao>> getBaoCaoByYear(@PathVariable int nam) {
         List<BaoCao> baoCaos = baoCaoService.getBaoCaoByYear(nam);
         return ResponseEntity.ok(baoCaos);
@@ -104,6 +115,7 @@ public class BaoCaoController {
      * Tạo báo cáo thủ công
      */
     @PostMapping
+    @Operation(summary = "Tạo mới báo cáo")
     public ResponseEntity<?> createBaoCao(@Valid @RequestBody BaoCao baoCao) {
         try {
             BaoCao createdBaoCao = baoCaoService.createBaoCao(baoCao);
@@ -118,6 +130,7 @@ public class BaoCaoController {
      * Tự động tạo báo cáo từ dữ liệu chấm công
      */
     @PostMapping("/generate")
+    @Operation(summary = "Tự động tạo báo cáo từ dữ liệu chấm công")
     public ResponseEntity<?> generateBaoCao(@RequestBody Map<String, Object> request) {
         try {
             Integer maNV = (Integer) request.get("maNV");
@@ -139,6 +152,7 @@ public class BaoCaoController {
      * Cập nhật báo cáo
      */
     @PutMapping("/{maBaoCao}")
+    @Operation(summary = "Cập nhật báo cáo")
     public ResponseEntity<?> updateBaoCao(
             @PathVariable Integer maBaoCao,
             @Valid @RequestBody BaoCao baoCao) {
@@ -155,6 +169,7 @@ public class BaoCaoController {
      * Xóa báo cáo
      */
     @DeleteMapping("/{maBaoCao}")
+    @Operation(summary = "Xóa báo cáo")
     public ResponseEntity<?> deleteBaoCao(@PathVariable Integer maBaoCao) {
         try {
             baoCaoService.deleteBaoCao(maBaoCao);
@@ -169,6 +184,7 @@ public class BaoCaoController {
      * Tính lương cho báo cáo
      */
     @PatchMapping("/{maBaoCao}/luong")
+    @Operation(summary = "Tính lương cho báo cáo")
     public ResponseEntity<?> calculateLuong(
             @PathVariable Integer maBaoCao,
             @RequestBody Map<String, Object> request) {
@@ -191,6 +207,7 @@ public class BaoCaoController {
      * Lấy tổng lương của nhân viên trong năm
      */
     @GetMapping("/nhanvien/{maNV}/tongluong")
+    @Operation(summary = "Lấy tổng lương của nhân viên trong năm")
     public ResponseEntity<Map<String, Object>> getTotalSalaryByYear(
             @PathVariable Integer maNV,
             @RequestParam int nam) {
@@ -205,6 +222,7 @@ public class BaoCaoController {
      * Lấy tổng giờ làm của nhân viên trong năm
      */
     @GetMapping("/nhanvien/{maNV}/tonggio")
+    @Operation(summary = "Lấy tổng giờ làm của nhân viên trong năm")
     public ResponseEntity<Map<String, Object>> getTotalHoursByYear(
             @PathVariable Integer maNV,
             @RequestParam int nam) {
@@ -219,6 +237,7 @@ public class BaoCaoController {
      * Lấy báo cáo mới nhất của nhân viên
      */
     @GetMapping("/nhanvien/{maNV}/latest")
+    @Operation(summary = "Lấy báo cáo mới nhất của nhân viên")
     public ResponseEntity<?> getLatestBaoCao(@PathVariable Integer maNV) {
         return baoCaoService.getLatestBaoCao(maNV)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
@@ -230,6 +249,7 @@ public class BaoCaoController {
      * Lấy thống kê tổng quan
      */
     @GetMapping("/thongke")
+    @Operation(summary = "Lấy thống kê tổng quan")
     public ResponseEntity<Map<String, Object>> getOverallStatistics(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate tuNgay,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate denNgay) {

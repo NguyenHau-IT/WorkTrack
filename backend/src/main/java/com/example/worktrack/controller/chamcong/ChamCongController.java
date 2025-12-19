@@ -2,6 +2,9 @@ package com.example.worktrack.controller.chamcong;
 
 import com.example.worktrack.model.chamcong.ChamCong;
 import com.example.worktrack.service.chamcong.ChamCongService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,6 +22,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/chamcong")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Tag(name = "Chấm Công", description = "API quản lý chấm công")
 public class ChamCongController {
 
     private final ChamCongService chamCongService;
@@ -27,6 +31,7 @@ public class ChamCongController {
      * Lấy tất cả bản ghi chấm công
      */
     @GetMapping
+    @Operation(summary = "Lấy tất cả bản ghi chấm công")
     public ResponseEntity<List<ChamCong>> getAllChamCong() {
         List<ChamCong> chamCongs = chamCongService.getAllChamCong();
         return ResponseEntity.ok(chamCongs);
@@ -36,6 +41,7 @@ public class ChamCongController {
      * Lấy bản ghi chấm công theo ID
      */
     @GetMapping("/{maChamCong}")
+    @Operation(summary = "Lấy bản ghi chấm công theo mã")
     public ResponseEntity<?> getChamCongById(@PathVariable Integer maChamCong) {
         // 1. Lấy dữ liệu từ Service (Trả về Optional)
         Optional<ChamCong> chamCongOpt = chamCongService.getChamCongById(maChamCong);
@@ -56,6 +62,7 @@ public class ChamCongController {
      * Lấy bản ghi chấm công của nhân viên
      */
     @GetMapping("/nhanvien/{maNV}")
+    @Operation(summary = "Lấy bản ghi chấm công của nhân viên")
     public ResponseEntity<List<ChamCong>> getChamCongByNhanVien(@PathVariable Integer maNV) {
         List<ChamCong> chamCongs = chamCongService.getChamCongByMaNV(maNV);
         return ResponseEntity.ok(chamCongs);
@@ -65,6 +72,7 @@ public class ChamCongController {
      * Lấy bản ghi chấm công của nhân viên theo khoảng thời gian
      */
     @GetMapping("/nhanvien/{maNV}/daterange")
+    @Operation(summary = "Lấy bản ghi chấm công của nhân viên theo khoảng thời gian")
     public ResponseEntity<List<ChamCong>> getChamCongByNhanVienAndDateRange(
             @PathVariable Integer maNV,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime tuNgay,
@@ -77,6 +85,7 @@ public class ChamCongController {
      * Lấy bản ghi chấm công theo khoảng thời gian
      */
     @GetMapping("/daterange")
+    @Operation(summary = "Lấy bản ghi chấm công theo khoảng thời gian")
     public ResponseEntity<List<ChamCong>> getChamCongByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime tuNgay,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime denNgay) {
@@ -88,6 +97,7 @@ public class ChamCongController {
      * Check-in (Chấm công vào)
      */
     @PostMapping("/checkin")
+    @Operation(summary = "Check-in (Chấm công vào)")
     public ResponseEntity<?> checkIn(@RequestBody Map<String, Object> request) {
         try {
             Integer maNV = (Integer) request.get("maNV");
@@ -106,6 +116,7 @@ public class ChamCongController {
      * Check-out (Chấm công ra)
      */
     @PostMapping("/checkout")
+    @Operation(summary = "Check-out (Chấm công ra)")
     public ResponseEntity<?> checkOut(@RequestBody Map<String, Object> request) {
         try {
             Integer maNV = (Integer) request.get("maNV");
@@ -123,6 +134,7 @@ public class ChamCongController {
      * Tạo bản ghi chấm công thủ công
      */
     @PostMapping
+    @Operation(summary = "Tạo bản ghi chấm công thủ công")
     public ResponseEntity<?> createChamCong(@Valid @RequestBody ChamCong chamCong) {
         try {
             ChamCong createdChamCong = chamCongService.createChamCong(chamCong);
@@ -137,6 +149,7 @@ public class ChamCongController {
      * Cập nhật bản ghi chấm công
      */
     @PutMapping("/{maChamCong}")
+    @Operation(summary = "Cập nhật bản ghi chấm công")
     public ResponseEntity<?> updateChamCong(
             @PathVariable Integer maChamCong,
             @Valid @RequestBody ChamCong chamCong) {
@@ -153,6 +166,7 @@ public class ChamCongController {
      * Xóa bản ghi chấm công
      */
     @DeleteMapping("/{maChamCong}")
+    @Operation(summary = "Xóa bản ghi chấm công")
     public ResponseEntity<?> deleteChamCong(@PathVariable Integer maChamCong) {
         try {
             chamCongService.deleteChamCong(maChamCong);
@@ -167,6 +181,7 @@ public class ChamCongController {
      * Lấy trạng thái chấm công hiện tại của nhân viên
      */
     @GetMapping("/nhanvien/{maNV}/status")
+    @Operation(summary = "Lấy trạng thái chấm công hiện tại của nhân viên")
     public ResponseEntity<?> getEmployeeStatus(@PathVariable Integer maNV) {
         return chamCongService.getActiveChamCong(maNV)
                 .map(chamCong -> ResponseEntity.ok(Map.of(
@@ -179,6 +194,7 @@ public class ChamCongController {
      * Lấy bản ghi chấm công mới nhất của nhân viên
      */
     @GetMapping("/nhanvien/{maNV}/latest")
+    @Operation(summary = "Lấy bản ghi chấm công mới nhất của nhân viên")
     public ResponseEntity<?> getLatestChamCong(@PathVariable Integer maNV) {
         // 1. Gọi Service lấy bản ghi mới nhất (trả về Optional)
         Optional<ChamCong> latestOpt = chamCongService.getLatestChamCong(maNV);
@@ -200,6 +216,7 @@ public class ChamCongController {
      * Lấy thống kê chấm công theo ngày
      */
     @GetMapping("/thongke/ngay")
+    @Operation(summary = "Lấy thống kê chấm công theo ngày")
     public ResponseEntity<Map<String, Object>> getStatisticsByDate(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ngay) {
         Map<String, Object> statistics = chamCongService.getStatisticsByDate(ngay);
@@ -210,6 +227,7 @@ public class ChamCongController {
      * Lấy thống kê chấm công hôm nay
      */
     @GetMapping("/thongke/homnay")
+    @Operation(summary = "Lấy thống kê chấm công hôm nay")
     public ResponseEntity<Map<String, Object>> getTodayStatistics() {
         Map<String, Object> statistics = chamCongService.getStatisticsByDate(LocalDate.now());
         return ResponseEntity.ok(statistics);
@@ -219,6 +237,7 @@ public class ChamCongController {
      * Lấy thống kê chấm công của nhân viên theo tháng
      */
     @GetMapping("/thongke/nhanvien/{maNV}/thang")
+    @Operation(summary = "Lấy thống kê chấm công của nhân viên theo tháng")
     public ResponseEntity<Map<String, Object>> getEmployeeStatisticsByMonth(
             @PathVariable Integer maNV,
             @RequestParam int nam,
@@ -231,6 +250,7 @@ public class ChamCongController {
      * Lấy danh sách nhân viên đã chấm công hôm nay
      */
     @GetMapping("/homnay/nhanvien")
+    @Operation(summary = "Lấy danh sách nhân viên đã chấm công hôm nay")
     public ResponseEntity<List<Integer>> getEmployeesCheckedInToday() {
         List<Integer> maNVs = chamCongService.getEmployeesCheckedInToday();
         return ResponseEntity.ok(maNVs);
