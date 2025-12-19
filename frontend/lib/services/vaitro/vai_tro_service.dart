@@ -104,6 +104,11 @@ class VaiTroService {
   Future<VaiTro> capNhatVaiTro(int id, VaiTro vaiTro) async {
     try {
       print('Đang cập nhật vai trò ID $id tại: $baseUrl/$id');
+      final body = vaiTro.toJson();
+      // Đảm bảo luôn gửi cả trường daXoa khi cập nhật
+      if (vaiTro.daXoa != null) {
+        body['daXoa'] = vaiTro.daXoa;
+      }
       final response = await http
           .put(
             Uri.parse('$baseUrl/$id'),
@@ -111,7 +116,7 @@ class VaiTroService {
               'Content-Type': 'application/json; charset=UTF-8',
               'Accept': 'application/json',
             },
-            body: jsonEncode(vaiTro.toJson()),
+            body: jsonEncode(body),
           )
           .timeout(const Duration(seconds: 10));
 
@@ -155,6 +160,39 @@ class VaiTroService {
         print('Xóa vai trò thành công');
       } else if (response.statusCode == 403) {
         throw Exception('Lỗi 403 - Không có quyền xóa!');
+      } else if (response.statusCode == 404) {
+        throw Exception('Không tìm thấy vai trò với ID: $id');
+      } else {
+        throw Exception('Lỗi từ server (${response.statusCode}): ${response.body}');
+      }
+    } on SocketException catch (e) {
+      throw Exception('Không thể kết nối tới server: $e');
+    } on http.ClientException catch (e) {
+      throw Exception('Lỗi kết nối: $e');
+    } catch (e) {
+      throw Exception('Lỗi không xác định: $e');
+    }
+  }
+
+// Khôi phục vai trò
+  Future<void> khoiPhucVaiTro(int id) async {
+    try {
+      print('Đang khôi phục vai trò ID $id tại: $baseUrl/restore/$id');
+      final response = await http
+          .put(
+            Uri.parse('$baseUrl/restore/$id'),
+            headers: {
+              'Accept': 'application/json',
+            },
+          )
+          .timeout(const Duration(seconds: 10));
+
+      print('Response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        print('Khôi phục vai trò thành công');
+      } else if (response.statusCode == 403) {
+        throw Exception('Lỗi 403 - Không có quyền khôi phục!');
       } else if (response.statusCode == 404) {
         throw Exception('Không tìm thấy vai trò với ID: $id');
       } else {

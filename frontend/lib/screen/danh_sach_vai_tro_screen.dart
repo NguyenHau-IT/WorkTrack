@@ -14,6 +14,7 @@ class DanhSachVaiTroScreen extends StatefulWidget {
 class _DanhSachVaiTroScreenState extends State<DanhSachVaiTroScreen> {
   final _vaiTroService = VaiTroService();
   List<VaiTro> _danhSachVaiTro = [];
+  bool _hienThiDaXoa = false;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -40,6 +41,30 @@ class _DanhSachVaiTroScreenState extends State<DanhSachVaiTroScreen> {
         _errorMessage = e.toString();
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _khoiPhucVaiTro(VaiTro vaiTro) async {
+    try {
+      await _vaiTroService.khoiPhucVaiTro(vaiTro.maVaiTro!);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Khôi phục vai trò thành công!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        _loadDanhSach();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -175,68 +200,104 @@ class _DanhSachVaiTroScreenState extends State<DanhSachVaiTroScreen> {
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadDanhSach,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: _danhSachVaiTro.length,
-        itemBuilder: (context, index) {
-          final vaiTro = _danhSachVaiTro[index];
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                child: Text(
-                  vaiTro.tenVaiTro.substring(0, 1).toUpperCase(),
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-              title: Text(
-                vaiTro.tenVaiTro,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              subtitle: vaiTro.moTa != null && vaiTro.moTa!.isNotEmpty
-                  ? Text(
-                      vaiTro.moTa!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    )
-                  : const Text(
-                      'Không có mô tả',
-                      style: TextStyle(fontStyle: FontStyle.italic),
-                    ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.orange),
-                    tooltip: 'Sửa',
-                    onPressed: () => _navigateToSuaVaiTro(vaiTro),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    tooltip: 'Xóa',
-                    onPressed: () => _xoaVaiTro(vaiTro),
-                  ),
-                  Text(
-                    'ID: \\${vaiTro.maVaiTro}',
-                    style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
+    // Lọc danh sách theo trạng thái daXoa
+    final danhSachHienThi = _danhSachVaiTro.where((v) => _hienThiDaXoa ? v.daXoa == true : v.daXoa != true).toList();
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton.icon(
+              icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
+              label: Text(_hienThiDaXoa ? 'Ẩn vai trò đã xóa' : 'Hiện vai trò đã xóa'),
+              onPressed: () {
+                setState(() {
+                  _hienThiDaXoa = !_hienThiDaXoa;
+                });
+              },
             ),
-          );
-        },
-      ),
+          ],
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadDanhSach,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8),
+              itemCount: danhSachHienThi.length,
+              itemBuilder: (context, index) {
+                final vaiTro = danhSachHienThi[index];
+                return Card(
+                  elevation: 2,
+                  margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: vaiTro.daXoa == true ? Colors.grey : Colors.blue,
+                      foregroundColor: Colors.white,
+                      child: Text(
+                        vaiTro.tenVaiTro.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    title: Text(
+                      vaiTro.tenVaiTro,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: vaiTro.daXoa == true ? Colors.grey : Colors.black,
+                        decoration: vaiTro.daXoa == true ? TextDecoration.lineThrough : null,
+                      ),
+                    ),
+                    subtitle: vaiTro.moTa != null && vaiTro.moTa!.isNotEmpty
+                        ? Text(
+                            vaiTro.moTa!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: vaiTro.daXoa == true ? Colors.grey : null,
+                              fontStyle: vaiTro.daXoa == true ? FontStyle.italic : null,
+                            ),
+                          )
+                        : const Text(
+                            'Không có mô tả',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (vaiTro.daXoa == true)
+                          IconButton(
+                            icon: const Icon(Icons.restore, color: Colors.green),
+                            tooltip: 'Khôi phục',
+                            onPressed: () => _khoiPhucVaiTro(vaiTro),
+                          )
+                        else ...[
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.orange),
+                            tooltip: 'Sửa',
+                            onPressed: () => _navigateToSuaVaiTro(vaiTro),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            tooltip: 'Xóa',
+                            onPressed: () => _xoaVaiTro(vaiTro),
+                          ),
+                        ],
+                        Text(
+                          'ID: ${vaiTro.maVaiTro}',
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
