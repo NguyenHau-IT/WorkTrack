@@ -43,6 +43,11 @@ public interface NhanVienService {
     void deleteNhanVien(Integer maNV);
 
     /**
+     * Khôi phục nhân viên
+     */
+    void restoreNhanVien(Integer maNV);
+
+    /**
      * Tìm kiếm nhân viên theo tên
      */
     List<NhanVien> searchNhanVienByName(String keyword);

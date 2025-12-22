@@ -109,6 +109,14 @@ public class NhanVienServiceImpl implements NhanVienService {
     }
 
     @Override
+    public void restoreNhanVien(Integer maNV) {
+        NhanVien nhanVien = nhanVienRepository.findById(maNV)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhân viên với mã: " + maNV));
+        nhanVien.setDaXoa(false);
+        nhanVienRepository.save(nhanVien);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NhanVien> searchNhanVienByName(String keyword) {
         return nhanVienRepository.searchByHoTen(keyword);
