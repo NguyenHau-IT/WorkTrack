@@ -150,6 +150,21 @@ public class NhanVienController {
     }
 
     /**
+     * Khôi phục nhân viên
+     */
+    @PutMapping("/restore/{maNV}")
+    @Operation(summary = "Khôi phục nhân viên")
+    public ResponseEntity<?> restoreNhanVien(@PathVariable Integer maNV) {
+        try {
+            nhanVienService.restoreNhanVien(maNV);
+            return ResponseEntity.ok(Map.of("message", "Khôi phục nhân viên thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
      * Kiểm tra email đã tồn tại
      */
     @GetMapping("/check-email/{email}")
@@ -232,7 +247,10 @@ public class NhanVienController {
      */
     @PostMapping("/login")
     @Operation(summary = "Đăng nhập nhân viên")
-    public ResponseEntity<?> login(@RequestParam String tenDangNhap, @RequestParam String matKhau) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+        String tenDangNhap = loginRequest.get("tenDangNhap");
+        String matKhau = loginRequest.get("matKhau");
+
         Optional<NhanVien> nhanVienOpt = nhanVienService.getNhanVienByTenDangNhap(tenDangNhap);
 
         if (nhanVienOpt.isPresent()) {
