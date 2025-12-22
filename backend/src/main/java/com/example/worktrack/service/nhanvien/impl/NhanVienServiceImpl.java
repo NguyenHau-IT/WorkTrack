@@ -133,6 +133,18 @@ public class NhanVienServiceImpl implements NhanVienService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public boolean isTenDangNhapExists(String tenDangNhap) {
+        return nhanVienRepository.existsByTenDangNhap(tenDangNhap);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<NhanVien> getNhanVienByTenDangNhap(String tenDangNhap) {
+        return nhanVienRepository.findByTenDangNhap(tenDangNhap);
+    }
+
+    @Override
     public NhanVien updateVanTay(Integer maNV, byte[] vanTay) {
         NhanVien nhanVien = nhanVienRepository.findById(maNV)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhân viên với mã: " + maNV));
