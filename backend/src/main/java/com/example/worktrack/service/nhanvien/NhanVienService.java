@@ -43,6 +43,11 @@ public interface NhanVienService {
     void deleteNhanVien(Integer maNV);
 
     /**
+     * Khôi phục nhân viên
+     */
+    void restoreNhanVien(Integer maNV);
+
+    /**
      * Tìm kiếm nhân viên theo tên
      */
     List<NhanVien> searchNhanVienByName(String keyword);
@@ -76,4 +81,14 @@ public interface NhanVienService {
      * Cập nhật thẻ NFC cho nhân viên
      */
     NhanVien updateTheNFC(Integer maNV, String theNFC);
+
+    /**
+     * Lấy nhân viên theo tên đăng nhập
+     */
+    Optional<NhanVien> getNhanVienByTenDangNhap(String tenDangNhap);
+
+    /**
+     * Kiểm tra tên đăng nhập đã tồn tại
+     */
+    boolean isTenDangNhapExists(String tenDangNhap);
 }

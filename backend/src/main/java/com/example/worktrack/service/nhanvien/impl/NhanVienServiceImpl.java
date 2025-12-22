@@ -109,6 +109,14 @@ public class NhanVienServiceImpl implements NhanVienService {
     }
 
     @Override
+    public void restoreNhanVien(Integer maNV) {
+        NhanVien nhanVien = nhanVienRepository.findById(maNV)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy nhân viên với mã: " + maNV));
+        nhanVien.setDaXoa(false);
+        nhanVienRepository.save(nhanVien);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NhanVien> searchNhanVienByName(String keyword) {
         return nhanVienRepository.searchByHoTen(keyword);
@@ -130,6 +138,18 @@ public class NhanVienServiceImpl implements NhanVienService {
     @Transactional(readOnly = true)
     public boolean isTheNFCExists(String theNFC) {
         return nhanVienRepository.existsByTheNFC(theNFC);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isTenDangNhapExists(String tenDangNhap) {
+        return nhanVienRepository.existsByTenDangNhap(tenDangNhap);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<NhanVien> getNhanVienByTenDangNhap(String tenDangNhap) {
+        return nhanVienRepository.findByTenDangNhap(tenDangNhap);
     }
 
     @Override
