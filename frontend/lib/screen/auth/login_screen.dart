@@ -14,12 +14,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final NhanVienService _nhanVienService = NhanVienService();
 
   String? _errorMessage;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
     super.initState();
-    _usernameController.text = 'admin';
-    _passwordController.text = 'admin123';
   }
 
   Future<void> _login() async {
@@ -28,21 +27,15 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      if (_usernameController.text == 'admin' &&
-          _passwordController.text == 'admin123') {
-        // Default admin login
-        Navigator.pushReplacementNamed(context, '/home', arguments: 'Default Admin');
-      } else {
-        // Check NhanVien table for other credentials
-        final nhanVien = await _nhanVienService.login(
-          _usernameController.text,
-          _passwordController.text,
-        );
-        Navigator.pushReplacementNamed(context, '/home', arguments: nhanVien);
-      }
+      // Kiểm tra trong database
+      final nhanVien = await _nhanVienService.login(
+        _usernameController.text,
+        _passwordController.text,
+      );
+      Navigator.pushReplacementNamed(context, '/home', arguments: nhanVien);
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString();
+        _errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại tên đăng nhập và mật khẩu.';
       });
     }
   }
@@ -68,10 +61,20 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(height: 16.0),
             TextField(
               controller: _passwordController,
-              obscureText: true,
+              obscureText: _obscurePassword,
               decoration: InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
             ),
             SizedBox(height: 16.0),
