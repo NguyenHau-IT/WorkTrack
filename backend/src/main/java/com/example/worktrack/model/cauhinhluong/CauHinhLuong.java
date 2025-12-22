@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "CauHinhLuong")
+@Table(name = "cau_hinh_luong")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,6 +36,6 @@ public class CauHinhLuong {
     @Column(name = "NgayTao", updatable = false)
     private LocalDateTime ngayTao;
 
-    @Column(name = "DaXoa", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "DaXoa", nullable = false, columnDefinition = "bit DEFAULT 0")
     private Boolean daXoa = false;
 }

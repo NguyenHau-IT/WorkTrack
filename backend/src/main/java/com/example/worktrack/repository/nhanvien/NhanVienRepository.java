@@ -48,4 +48,14 @@ public interface NhanVienRepository extends JpaRepository<NhanVien, Integer> {
      * Kiểm tra thẻ NFC đã tồn tại chưa
      */
     boolean existsByTheNFC(String theNFC);
+
+    /**
+     * Tìm nhân viên theo tên đăng nhập
+     */
+    Optional<NhanVien> findByTenDangNhap(String tenDangNhap);
+
+    /**
+     * Kiểm tra tên đăng nhập đã tồn tại chưa
+     */
+    boolean existsByTenDangNhap(String tenDangNhap);
 }

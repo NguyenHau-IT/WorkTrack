@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "BaoCao")
+@Table(name = "bao_cao")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -59,6 +59,6 @@ public class BaoCao {
     @Column(name = "NgayTao", updatable = false)
     private LocalDateTime ngayTao;
 
-    @Column(name = "DaXoa", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "DaXoa", nullable = false, columnDefinition = "bit DEFAULT 0")
     private Boolean daXoa = false;
 }

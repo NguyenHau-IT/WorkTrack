@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "VaiTro")
+@Table(name = "vai_tro")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,6 +38,6 @@ public class VaiTro {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime ngayTao;
 
-    @Column(name = "DaXoa", nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "DaXoa", nullable = false, columnDefinition = "bit DEFAULT 0")
     private Boolean daXoa = false;
 }

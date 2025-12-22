@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screen/vaitro/danh_sach_vai_tro_screen.dart';
+import 'screen/auth/login_screen.dart';
+import 'screen/home/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -17,7 +18,11 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const DanhSachVaiTroScreen(),
+      initialRoute: '/login',
+      routes: {
+        '/login': (context) => LoginScreen(),
+        '/home': (context) => HomeScreen(),
+      },
     );
   }
 }
