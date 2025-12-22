@@ -12,7 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "ChamCong")
+@Table(name = "cham_cong")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -48,7 +48,7 @@ public class ChamCong {
     @Column(name = "NgayTao", updatable = false)
     private LocalDateTime ngayTao;
 
-    @Column(name = "DaXoa", nullable = false , columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "DaXoa", nullable = false , columnDefinition = "bit DEFAULT 0")
     private Boolean daXoa = false;
 
     /**

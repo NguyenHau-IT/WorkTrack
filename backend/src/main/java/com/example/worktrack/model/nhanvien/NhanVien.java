@@ -15,7 +15,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "NhanVien")
+@Table(name = "nhan_vien")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -69,6 +69,16 @@ public class NhanVien {
     @Column(name = "NgayCapNhat")
     private LocalDateTime ngayCapNhat;
 
-    @Column(name = "DaXoa", nullable = false , columnDefinition = "BOOLEAN DEFAULT false")
+    @Column(name = "DaXoa", nullable = false, columnDefinition = "bit DEFAULT 0")
     private Boolean daXoa = false;
+
+    @NotBlank(message = "Tên đăng nhập không được để trống")
+    @Size(max = 50, message = "Tên đăng nhập không được vượt quá 50 ký tự")
+    @Column(name = "TenDangNhap", nullable = false, unique = true, length = 50)
+    private String tenDangNhap;
+
+    @NotBlank(message = "Mật khẩu không được để trống")
+    @Size(max = 100, message = "Mật khẩu không được vượt quá 100 ký tự")
+    @Column(name = "MatKhau", nullable = false, length = 100)
+    private String matKhau;
 }
