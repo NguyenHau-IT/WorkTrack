@@ -129,6 +129,21 @@ public class VaiTroController {
     }
 
     /**
+     * Xóa cứng vai trò (xóa vĩnh viễn)
+     */
+    @DeleteMapping("/{maVaiTro}/hard")
+    @Operation(summary = "Xóa cứng vai trò (xóa vĩnh viễn)")
+    public ResponseEntity<?> hardDeleteVaiTro(@PathVariable Integer maVaiTro) {
+        try {
+            vaiTroService.hardDeleteVaiTro(maVaiTro);
+            return ResponseEntity.ok(Map.of("message", "Xóa vĩnh viễn vai trò thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
      * Kiểm tra vai trò đã tồn tại
      */
     @GetMapping("/check/{tenVaiTro}")

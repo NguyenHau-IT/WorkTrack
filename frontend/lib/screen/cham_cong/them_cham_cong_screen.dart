@@ -65,7 +65,7 @@ class _ThemChamCongScreenState extends State<ThemChamCongScreen> {
       context: context,
       initialDate: _gioVao ?? DateTime.now(),
       firstDate: DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: DateTime.now(), // Chỉ cho phép chọn ngày hiện tại hoặc quá khứ
     );
 
     if (date != null && mounted) {
@@ -75,8 +75,21 @@ class _ThemChamCongScreenState extends State<ThemChamCongScreen> {
       );
 
       if (time != null) {
+        final selectedDateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+        
+        // Kiểm tra không được chấm công tương lai
+        if (selectedDateTime.isAfter(DateTime.now())) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể chấm công cho thời gian tương lai'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        
         setState(() {
-          _gioVao = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+          _gioVao = selectedDateTime;
         });
       }
     }
@@ -87,7 +100,7 @@ class _ThemChamCongScreenState extends State<ThemChamCongScreen> {
       context: context,
       initialDate: _gioRa ?? _gioVao ?? DateTime.now(),
       firstDate: _gioVao ?? DateTime(2020),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      lastDate: DateTime.now(), // Chỉ cho phép chọn ngày hiện tại hoặc quá khứ
     );
 
     if (date != null && mounted) {
@@ -97,8 +110,21 @@ class _ThemChamCongScreenState extends State<ThemChamCongScreen> {
       );
 
       if (time != null) {
+        final selectedDateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+        
+        // Kiểm tra không được chấm công tương lai
+        if (selectedDateTime.isAfter(DateTime.now())) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể chấm công cho thời gian tương lai'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        
         setState(() {
-          _gioRa = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+          _gioRa = selectedDateTime;
         });
       }
     }
@@ -139,6 +165,27 @@ class _ThemChamCongScreenState extends State<ThemChamCongScreen> {
       return;
     }
 
+    // Tự động điền giờ ra là 17h nếu chưa có giờ ra và ngày chấm công không phải hôm nay
+    DateTime? gioRaFinal = _gioRa;
+    if (gioRaFinal == null && _gioVao != null) {
+      final gioVaoDate = DateTime(_gioVao!.year, _gioVao!.month, _gioVao!.day);
+      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      
+      // Nếu ngày chấm công là quá khứ (không phải hôm nay), tự động set giờ ra là 17h
+      if (gioVaoDate.isBefore(today)) {
+        gioRaFinal = DateTime(_gioVao!.year, _gioVao!.month, _gioVao!.day, 17, 0);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Giờ ra đã được tự động điền là 17:00'),
+              backgroundColor: Colors.blue,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -147,7 +194,7 @@ class _ThemChamCongScreenState extends State<ThemChamCongScreen> {
       final chamCong = ChamCong(
         maNV: _maNV,
         gioVao: _gioVao,
-        gioRa: _gioRa,
+        gioRa: gioRaFinal,
         phuongThuc: _phuongThuc,
         ghiChu: _ghiChuController.text.trim().isEmpty ? null : _ghiChuController.text.trim(),
       );
@@ -168,10 +215,40 @@ class _ThemChamCongScreenState extends State<ThemChamCongScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: ${e.toString()}'),
-            backgroundColor: Colors.red,
+        String errorMessage = 'Không thể thêm chấm công';
+        String errorDetail = 'Vui lòng thử lại sau';
+        
+        if (e.toString().contains('403')) {
+          errorMessage = 'Không có quyền truy cập';
+          errorDetail = 'Bạn không có quyền thêm chấm công';
+        } else if (e.toString().contains('404')) {
+          errorMessage = 'Không tìm thấy nhân viên';
+          errorDetail = 'Nhân viên không tồn tại trong hệ thống';
+        } else if (e.toString().contains('Giờ ra phải sau giờ vào')) {
+          errorMessage = 'Thời gian không hợp lệ';
+          errorDetail = 'Giờ ra phải sau giờ vào. Vui lòng kiểm tra lại';
+        } else if (e.toString().contains('network') || e.toString().contains('Connection')) {
+          errorMessage = 'Lỗi kết nối';
+          errorDetail = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng';
+        }
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 28),
+                const SizedBox(width: 8),
+                Text(errorMessage),
+              ],
+            ),
+            content: Text(errorDetail),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng'),
+              ),
+            ],
           ),
         );
       }

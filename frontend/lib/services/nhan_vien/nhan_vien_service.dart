@@ -35,6 +35,10 @@ class NhanVienService {
     await _apiService.put('$endpoint/restore/$maNV');
   }
 
+  Future<void> hardDeleteNhanVien(int maNV) async {
+    await _apiService.delete('$endpoint/$maNV/hard');
+  }
+
   Future<bool> checkEmailExists(String email) async {
     final response = await _apiService.get('$endpoint/check-email/$email');
     return json.decode(response.body)['exists'];

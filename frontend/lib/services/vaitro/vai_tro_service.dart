@@ -38,4 +38,9 @@ class VaiTroService {
   Future<void> khoiPhucVaiTro(int id) async {
     await _apiService.put('$endpoint/restore/$id');
   }
+
+  // Xóa cứng vai trò (hard delete)
+  Future<void> hardDeleteVaiTro(int id) async {
+    await _apiService.delete('$endpoint/$id/hard');
+  }
 }

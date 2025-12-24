@@ -28,10 +28,21 @@ class BaoCao {
   });
 
   factory BaoCao.fromJson(Map<String, dynamic> json) {
+    String? tenNV;
+    if (json['nhanVien'] != null) {
+      if (json['nhanVien']['tenNV'] != null) {
+        tenNV = json['nhanVien']['tenNV'];
+      } else if (json['nhanVien']['hoTen'] != null) {
+        tenNV = json['nhanVien']['hoTen'];
+      }
+    } else if (json['tenNhanVien'] != null) {
+      tenNV = json['tenNhanVien'];
+    }
+    
     return BaoCao(
       maBaoCao: json['maBaoCao'],
       maNV: json['maNV'],
-      tenNhanVien: json['nhanVien'] != null ? json['nhanVien']['tenNV'] : null,
+      tenNhanVien: tenNV,
       tuNgay: DateTime.parse(json['tuNgay']),
       denNgay: DateTime.parse(json['denNgay']),
       tongGio: json['tongGio'] != null ? (json['tongGio'] as num).toDouble() : 0.0,

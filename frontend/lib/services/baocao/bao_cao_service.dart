@@ -86,6 +86,11 @@ class BaoCaoService {
     return BaoCao.fromJson(json.decode(response.body));
   }
 
+  // Xóa cứng báo cáo (hard delete)
+  Future<void> hardDeleteBaoCao(int maBaoCao) async {
+    await _apiService.delete('$endpoint/$maBaoCao/hard');
+  }
+
   // Tính toán thống kê từ báo cáo
   Map<String, dynamic> calculateStatistics(BaoCao baoCao) {
     return {

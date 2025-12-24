@@ -117,6 +117,14 @@ public class NhanVienServiceImpl implements NhanVienService {
     }
 
     @Override
+    public void hardDeleteNhanVien(Integer maNV) {
+        if (!nhanVienRepository.existsById(maNV)) {
+            throw new IllegalArgumentException("Không tìm thấy nhân viên với mã: " + maNV);
+        }
+        nhanVienRepository.deleteById(maNV);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<NhanVien> searchNhanVienByName(String keyword) {
         return nhanVienRepository.searchByHoTen(keyword);

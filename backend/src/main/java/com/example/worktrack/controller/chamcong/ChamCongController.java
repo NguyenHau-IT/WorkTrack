@@ -180,6 +180,36 @@ public class ChamCongController {
     }
 
     /**
+     * Khôi phục bản ghi chấm công đã xóa
+     */
+    @PutMapping("/restore/{maChamCong}")
+    @Operation(summary = "Khôi phục bản ghi chấm công đã xóa")
+    public ResponseEntity<?> restoreChamCong(@PathVariable Integer maChamCong) {
+        try {
+            ChamCong restored = chamCongService.restoreChamCong(maChamCong);
+            return ResponseEntity.ok(restored);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Xóa vĩnh viễn bản ghi chấm công (hard delete)
+     */
+    @DeleteMapping("/{maChamCong}/hard")
+    @Operation(summary = "Xóa vĩnh viễn bản ghi chấm công")
+    public ResponseEntity<?> hardDeleteChamCong(@PathVariable Integer maChamCong) {
+        try {
+            chamCongService.hardDeleteChamCong(maChamCong);
+            return ResponseEntity.ok(Map.of("message", "Xóa vĩnh viễn bản ghi chấm công thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
      * Lấy trạng thái chấm công hiện tại của nhân viên
      */
     @GetMapping("/nhanvien/{maNV}/status")

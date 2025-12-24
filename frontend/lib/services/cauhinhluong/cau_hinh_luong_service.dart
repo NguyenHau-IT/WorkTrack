@@ -42,6 +42,11 @@ class CauHinhLuongService {
     return CauHinhLuong.fromJson(json.decode(response.body));
   }
 
+  // Xóa cứng cấu hình lương (hard delete)
+  Future<void> hardDeleteCauHinhLuong(int maCauHinh) async {
+    await _apiService.delete('$endpoint/$maCauHinh/hard');
+  }
+
   // Lấy cấu hình lương đang áp dụng hiện tại
   Future<CauHinhLuong> getActiveCauHinhLuong() async {
     final response = await _apiService.get('$endpoint/active');

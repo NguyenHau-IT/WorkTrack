@@ -93,6 +93,11 @@ class ChamCongService {
     await _apiService.put('$endpoint/restore/$maChamCong');
   }
 
+  /// Xóa cứng bản ghi chấm công (hard delete)
+  Future<void> hardDeleteChamCong(int maChamCong) async {
+    await _apiService.delete('$endpoint/$maChamCong/hard');
+  }
+
   /// Lấy bản ghi chấm công hiện tại của nhân viên (đang chấm công)
   Future<ChamCong?> getChamCongHienTai(int maNV) async {
     try {

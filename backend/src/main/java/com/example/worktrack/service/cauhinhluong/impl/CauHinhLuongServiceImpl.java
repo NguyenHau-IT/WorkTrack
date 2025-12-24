@@ -101,4 +101,12 @@ public class CauHinhLuongServiceImpl implements CauHinhLuongService {
         cauHinhLuong.setDaXoa(false);
         return cauHinhLuongRepository.save(cauHinhLuong);
     }
+
+    @Override
+    public void hardDeleteCauHinhLuong(Integer maCauHinh) {
+        if (!cauHinhLuongRepository.existsById(maCauHinh)) {
+            throw new IllegalArgumentException("Không tìm thấy cấu hình lương với mã: " + maCauHinh);
+        }
+        cauHinhLuongRepository.deleteById(maCauHinh);
+    }
 }

@@ -5,7 +5,6 @@ import '../../services/nhan_vien/nhan_vien_service.dart';
 import '../../services/chamcong/cham_cong_service.dart';
 import '../../services/cauhinhluong/cau_hinh_luong_service.dart';
 import '../../model/nhanvien/nhan_vien.dart';
-import '../../model/chamcong/cham_cong.dart';
 import '../../model/cauhinhluong/cau_hinh_luong.dart';
 import '../../model/baocao/bao_cao.dart';
 

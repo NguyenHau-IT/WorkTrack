@@ -57,10 +57,41 @@ class _CapNhatChamCongScreenState extends State<CapNhatChamCongScreen> {
         _isLoadingNhanVien = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi khi tải danh sách nhân viên: ${e.toString()}'),
-            backgroundColor: Colors.red,
+        String errorMessage = 'Không thể tải danh sách nhân viên';
+        String errorDetail = 'Vui lòng thử lại sau';
+        
+        if (e.toString().contains('403')) {
+          errorMessage = 'Không có quyền truy cập';
+          errorDetail = 'Bạn không có quyền xem danh sách nhân viên';
+        } else if (e.toString().contains('network') || e.toString().contains('Connection')) {
+          errorMessage = 'Lỗi kết nối';
+          errorDetail = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng';
+        }
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                const SizedBox(width: 8),
+                Text(errorMessage),
+              ],
+            ),
+            content: Text(errorDetail),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _loadDanhSachNhanVien();
+                },
+                child: const Text('Thử lại'),
+              ),
+            ],
           ),
         );
       }
@@ -177,10 +208,40 @@ class _CapNhatChamCongScreenState extends State<CapNhatChamCongScreen> {
         _isLoading = false;
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: ${e.toString()}'),
-            backgroundColor: Colors.red,
+        String errorMessage = 'Không thể cập nhật chấm công';
+        String errorDetail = 'Vui lòng thử lại sau';
+        
+        if (e.toString().contains('403')) {
+          errorMessage = 'Không có quyền truy cập';
+          errorDetail = 'Bạn không có quyền cập nhật chấm công';
+        } else if (e.toString().contains('404')) {
+          errorMessage = 'Không tìm thấy dữ liệu';
+          errorDetail = 'Bản ghi chấm công không tồn tại hoặc đã bị xóa';
+        } else if (e.toString().contains('Giờ ra phải sau giờ vào')) {
+          errorMessage = 'Thời gian không hợp lệ';
+          errorDetail = 'Giờ ra phải sau giờ vào. Vui lòng kiểm tra lại';
+        } else if (e.toString().contains('network') || e.toString().contains('Connection')) {
+          errorMessage = 'Lỗi kết nối';
+          errorDetail = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng';
+        }
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.red, size: 28),
+                const SizedBox(width: 8),
+                Text(errorMessage),
+              ],
+            ),
+            content: Text(errorDetail),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng'),
+              ),
+            ],
           ),
         );
       }

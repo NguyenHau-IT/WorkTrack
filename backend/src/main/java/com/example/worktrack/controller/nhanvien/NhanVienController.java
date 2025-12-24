@@ -165,6 +165,21 @@ public class NhanVienController {
     }
 
     /**
+     * Xóa cứng nhân viên (xóa vĩnh viễn)
+     */
+    @DeleteMapping("/{maNV}/hard")
+    @Operation(summary = "Xóa cứng nhân viên (xóa vĩnh viễn)")
+    public ResponseEntity<?> hardDeleteNhanVien(@PathVariable Integer maNV) {
+        try {
+            nhanVienService.hardDeleteNhanVien(maNV);
+            return ResponseEntity.ok(Map.of("message", "Xóa vĩnh viễn nhân viên thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
      * Kiểm tra email đã tồn tại
      */
     @GetMapping("/check-email/{email}")

@@ -151,6 +151,28 @@ public class ChamCongServiceImpl implements ChamCongService {
     }
 
     @Override
+    public ChamCong restoreChamCong(Integer maChamCong) {
+        ChamCong chamCong = chamCongRepository.findById(maChamCong)
+                .orElseThrow(
+                        () -> new IllegalArgumentException("Không tìm thấy bản ghi chấm công với mã: " + maChamCong));
+
+        if (!chamCong.getDaXoa()) {
+            throw new IllegalArgumentException("Bản ghi chấm công chưa bị xóa");
+        }
+
+        chamCong.setDaXoa(false);
+        return chamCongRepository.save(chamCong);
+    }
+
+    @Override
+    public void hardDeleteChamCong(Integer maChamCong) {
+        if (!chamCongRepository.existsById(maChamCong)) {
+            throw new IllegalArgumentException("Không tìm thấy bản ghi chấm công với mã: " + maChamCong);
+        }
+        chamCongRepository.deleteById(maChamCong);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public Optional<ChamCong> getActiveChamCong(Integer maNV) {
         return chamCongRepository.findActiveCheckin(maNV);
