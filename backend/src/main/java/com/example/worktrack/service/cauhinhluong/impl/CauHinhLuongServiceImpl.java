@@ -88,4 +88,17 @@ public class CauHinhLuongServiceImpl implements CauHinhLuongService {
         cauHinhLuong.setDaXoa(true);
         cauHinhLuongRepository.save(cauHinhLuong);
     }
+
+    @Override
+    public CauHinhLuong restoreCauHinhLuong(Integer maCauHinh) {
+        CauHinhLuong cauHinhLuong = cauHinhLuongRepository.findById(maCauHinh)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy cấu hình lương với mã: " + maCauHinh));
+
+        if (!cauHinhLuong.getDaXoa()) {
+            throw new IllegalArgumentException("Cấu hình lương này chưa bị xóa");
+        }
+
+        cauHinhLuong.setDaXoa(false);
+        return cauHinhLuongRepository.save(cauHinhLuong);
+    }
 }

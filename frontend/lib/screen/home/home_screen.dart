@@ -5,6 +5,7 @@ import '../profile/profile_screen.dart';
 import '../cham_cong/danh_sach_cham_cong_screen.dart';
 import '../cham_cong/ghi_nfc_screen.dart';
 import '../cham_cong/doc_nfc_cham_cong_screen.dart';
+import '../cau_hinh_luong/danh_sach_cau_hinh_luong_screen.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -167,6 +168,20 @@ class HomeScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const DanhSachChamCongScreen(),
+                ),
+              );
+            },
+          ),
+          _buildMenuCard(
+            context,
+            icon: Icons.settings,
+            title: 'Cấu Hình Lương',
+            color: Colors.indigo,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DanhSachCauHinhLuongScreen(),
                 ),
               );
             },

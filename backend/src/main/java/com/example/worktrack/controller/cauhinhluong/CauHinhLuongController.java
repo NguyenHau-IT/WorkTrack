@@ -111,4 +111,19 @@ public class CauHinhLuongController {
                     .body(Map.of("message", e.getMessage()));
         }
     }
+
+    /**
+     * Khôi phục cấu hình lương đã xóa
+     */
+    @PutMapping("/{maCauHinh}/restore")
+    @Operation(summary = "Khôi phục cấu hình lương đã xóa")
+    public ResponseEntity<?> restoreCauHinhLuong(@PathVariable Integer maCauHinh) {
+        try {
+            CauHinhLuong restoredCauHinh = cauHinhLuongService.restoreCauHinhLuong(maCauHinh);
+            return ResponseEntity.ok(restoredCauHinh);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
 }
