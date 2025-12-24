@@ -36,4 +36,14 @@ public interface CauHinhLuongService {
      * Xóa cấu hình lương
      */
     void deleteCauHinhLuong(Integer maCauHinh);
+
+    /**
+     * Khôi phục cấu hình lương đã xóa
+     */
+    CauHinhLuong restoreCauHinhLuong(Integer maCauHinh);
+
+    /**
+     * Xóa cứng cấu hình lương (xóa vĩnh viễn)
+     */
+    void hardDeleteCauHinhLuong(Integer maCauHinh);
 }

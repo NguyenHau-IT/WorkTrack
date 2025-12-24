@@ -71,12 +71,14 @@ public class ChamCongController {
     /**
      * Lấy bản ghi chấm công của nhân viên theo khoảng thời gian
      */
-    @GetMapping("/nhanvien/{maNV}/daterange")
+    @GetMapping("/nhanvien/{maNV}/range")
     @Operation(summary = "Lấy bản ghi chấm công của nhân viên theo khoảng thời gian")
     public ResponseEntity<List<ChamCong>> getChamCongByNhanVienAndDateRange(
             @PathVariable Integer maNV,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime tuNgay,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime denNgay) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        LocalDateTime tuNgay = startDate.atStartOfDay();
+        LocalDateTime denNgay = endDate.atTime(23, 59, 59);
         List<ChamCong> chamCongs = chamCongService.getChamCongByMaNVAndDateRange(maNV, tuNgay, denNgay);
         return ResponseEntity.ok(chamCongs);
     }
@@ -171,6 +173,36 @@ public class ChamCongController {
         try {
             chamCongService.deleteChamCong(maChamCong);
             return ResponseEntity.ok(Map.of("message", "Xóa bản ghi chấm công thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Khôi phục bản ghi chấm công đã xóa
+     */
+    @PutMapping("/restore/{maChamCong}")
+    @Operation(summary = "Khôi phục bản ghi chấm công đã xóa")
+    public ResponseEntity<?> restoreChamCong(@PathVariable Integer maChamCong) {
+        try {
+            ChamCong restored = chamCongService.restoreChamCong(maChamCong);
+            return ResponseEntity.ok(restored);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Xóa vĩnh viễn bản ghi chấm công (hard delete)
+     */
+    @DeleteMapping("/{maChamCong}/hard")
+    @Operation(summary = "Xóa vĩnh viễn bản ghi chấm công")
+    public ResponseEntity<?> hardDeleteChamCong(@PathVariable Integer maChamCong) {
+        try {
+            chamCongService.hardDeleteChamCong(maChamCong);
+            return ResponseEntity.ok(Map.of("message", "Xóa vĩnh viễn bản ghi chấm công thành công"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("message", e.getMessage()));

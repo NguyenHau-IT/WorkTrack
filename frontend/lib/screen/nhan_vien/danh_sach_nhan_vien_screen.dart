@@ -145,6 +145,104 @@ class _DanhSachNhanVienScreenState extends State<DanhSachNhanVienScreen> {
     }
   }
 
+  Future<void> _xoaCungNhanVien(NhanVien nhanVien) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning, color: Colors.red, size: 28),
+            SizedBox(width: 8),
+            Text('Xác nhận xóa vĩnh viễn'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Bạn có chắc chắn muốn xóa VĨNH VIỄN nhân viên này?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text('Nhân viên: ${nhanVien.hoTen}'),
+            Text('Mã: ${nhanVien.maNV}'),
+            const SizedBox(height: 16),
+            const Text(
+              '⚠️ Hành động này KHÔNG THỂ HOÀN TÁC!',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Xóa vĩnh viễn'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _nhanVienService.hardDeleteNhanVien(nhanVien.maNV!);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã xóa vĩnh viễn nhân viên!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _loadDanhSach();
+        }
+      } catch (e) {
+        if (mounted) {
+          String errorMessage = 'Không thể xóa vĩnh viễn';
+          String errorDetail = 'Vui lòng thử lại sau';
+          
+          if (e.toString().contains('403')) {
+            errorMessage = 'Không có quyền truy cập';
+            errorDetail = 'Bạn không có quyền xóa vĩnh viễn nhân viên này';
+          } else if (e.toString().contains('404')) {
+            errorMessage = 'Không tìm thấy dữ liệu';
+            errorDetail = 'Nhân viên không tồn tại trong hệ thống';
+          } else if (e.toString().contains('network') || e.toString().contains('Connection')) {
+            errorMessage = 'Lỗi kết nối';
+            errorDetail = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng';
+          }
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 28),
+                  const SizedBox(width: 8),
+                  Text(errorMessage),
+                ],
+              ),
+              content: Text(errorDetail),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Đóng'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -316,13 +414,18 @@ class _DanhSachNhanVienScreenState extends State<DanhSachNhanVienScreen> {
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (nhanVien.daXoa)
+                              if (nhanVien.daXoa) ...[
                                 IconButton(
                                   icon: const Icon(Icons.restore, color: Colors.green),
                                   tooltip: 'Khôi phục',
                                   onPressed: () => _khoiPhucNhanVien(nhanVien),
-                                )
-                              else ...[
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_forever, color: Colors.red),
+                                  tooltip: 'Xóa vĩnh viễn',
+                                  onPressed: () => _xoaCungNhanVien(nhanVien),
+                                ),
+                              ] else ...[
                                 IconButton(
                                   icon: const Icon(Icons.edit, color: Colors.orange),
                                   tooltip: 'Sửa',

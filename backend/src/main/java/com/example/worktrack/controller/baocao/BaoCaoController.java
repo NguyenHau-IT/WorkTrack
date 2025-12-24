@@ -181,6 +181,36 @@ public class BaoCaoController {
     }
 
     /**
+     * Khôi phục báo cáo
+     */
+    @PutMapping("/restore/{maBaoCao}")
+    @Operation(summary = "Khôi phục báo cáo")
+    public ResponseEntity<?> restoreBaoCao(@PathVariable Integer maBaoCao) {
+        try {
+            baoCaoService.restoreBaoCao(maBaoCao);
+            return ResponseEntity.ok(Map.of("message", "Khôi phục báo cáo thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Xóa cứng báo cáo (xóa vĩnh viễn)
+     */
+    @DeleteMapping("/{maBaoCao}/hard")
+    @Operation(summary = "Xóa cứng báo cáo (xóa vĩnh viễn)")
+    public ResponseEntity<?> hardDeleteBaoCao(@PathVariable Integer maBaoCao) {
+        try {
+            baoCaoService.hardDeleteBaoCao(maBaoCao);
+            return ResponseEntity.ok(Map.of("message", "Xóa vĩnh viễn báo cáo thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
      * Tính lương cho báo cáo
      */
     @PatchMapping("/{maBaoCao}/luong")

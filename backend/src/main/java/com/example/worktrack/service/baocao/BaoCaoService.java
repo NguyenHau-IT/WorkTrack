@@ -51,6 +51,16 @@ public interface BaoCaoService {
     void deleteBaoCao(Integer maBaoCao);
 
     /**
+     * Khôi phục báo cáo
+     */
+    void restoreBaoCao(Integer maBaoCao);
+
+    /**
+     * Xóa cứng báo cáo (xóa vĩnh viễn)
+     */
+    void hardDeleteBaoCao(Integer maBaoCao);
+
+    /**
      * Tự động tạo báo cáo cho nhân viên dựa trên dữ liệu chấm công
      */
     BaoCao generateBaoCao(Integer maNV, LocalDate tuNgay, LocalDate denNgay);
