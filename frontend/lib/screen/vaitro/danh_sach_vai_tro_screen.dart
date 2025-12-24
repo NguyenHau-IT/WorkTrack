@@ -68,6 +68,104 @@ class _DanhSachVaiTroScreenState extends State<DanhSachVaiTroScreen> {
     }
   }
 
+  Future<void> _xoaCungVaiTro(VaiTro vaiTro) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning, color: Colors.red, size: 28),
+            SizedBox(width: 8),
+            Text('Xác nhận xóa vĩnh viễn'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Bạn có chắc chắn muốn xóa VĨNH VIỄN vai trò này?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text('Vai trò: ${vaiTro.tenVaiTro}'),
+            Text('Mã: ${vaiTro.maVaiTro}'),
+            const SizedBox(height: 16),
+            const Text(
+              '⚠️ Hành động này KHÔNG THỂ HOÀN TÁC!',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Hủy'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Xóa vĩnh viễn'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      try {
+        await _vaiTroService.hardDeleteVaiTro(vaiTro.maVaiTro!);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Đã xóa vĩnh viễn vai trò!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _loadDanhSach();
+        }
+      } catch (e) {
+        if (mounted) {
+          String errorMessage = 'Không thể xóa vĩnh viễn';
+          String errorDetail = 'Vui lòng thử lại sau';
+          
+          if (e.toString().contains('403')) {
+            errorMessage = 'Không có quyền truy cập';
+            errorDetail = 'Bạn không có quyền xóa vĩnh viễn vai trò này';
+          } else if (e.toString().contains('404')) {
+            errorMessage = 'Không tìm thấy dữ liệu';
+            errorDetail = 'Vai trò không tồn tại trong hệ thống';
+          } else if (e.toString().contains('network') || e.toString().contains('Connection')) {
+            errorMessage = 'Lỗi kết nối';
+            errorDetail = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng';
+          }
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Row(
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 28),
+                  const SizedBox(width: 8),
+                  Text(errorMessage),
+                ],
+              ),
+              content: Text(errorDetail),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Đóng'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    }
+  }
+
   Future<void> _navigateToThemVaiTro() async {
     final result = await Navigator.push(
       context,
@@ -264,13 +362,18 @@ class _DanhSachVaiTroScreenState extends State<DanhSachVaiTroScreen> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (vaiTro.daXoa == true)
+                        if (vaiTro.daXoa == true) ...[
                           IconButton(
                             icon: const Icon(Icons.restore, color: Colors.green),
                             tooltip: 'Khôi phục',
                             onPressed: () => _khoiPhucVaiTro(vaiTro),
-                          )
-                        else ...[
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_forever, color: Colors.red),
+                            tooltip: 'Xóa vĩnh viễn',
+                            onPressed: () => _xoaCungVaiTro(vaiTro),
+                          ),
+                        ] else ...[
                           IconButton(
                             icon: const Icon(Icons.edit, color: Colors.orange),
                             tooltip: 'Sửa',

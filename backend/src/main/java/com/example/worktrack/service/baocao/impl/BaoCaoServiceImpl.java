@@ -124,6 +124,22 @@ public class BaoCaoServiceImpl implements BaoCaoService {
     }
 
     @Override
+    public void restoreBaoCao(Integer maBaoCao) {
+        BaoCao baoCao = baoCaoRepository.findById(maBaoCao)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy báo cáo với mã: " + maBaoCao));
+        baoCao.setDaXoa(false);
+        baoCaoRepository.save(baoCao);
+    }
+
+    @Override
+    public void hardDeleteBaoCao(Integer maBaoCao) {
+        if (!baoCaoRepository.existsById(maBaoCao)) {
+            throw new IllegalArgumentException("Không tìm thấy báo cáo với mã: " + maBaoCao);
+        }
+        baoCaoRepository.deleteById(maBaoCao);
+    }
+
+    @Override
     public BaoCao generateBaoCao(Integer maNV, LocalDate tuNgay, LocalDate denNgay) {
         // Kiểm tra nhân viên có tồn tại không
         if (!nhanVienRepository.existsById(maNV)) {

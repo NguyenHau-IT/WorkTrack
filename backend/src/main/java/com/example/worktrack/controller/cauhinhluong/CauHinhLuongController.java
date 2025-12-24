@@ -111,4 +111,34 @@ public class CauHinhLuongController {
                     .body(Map.of("message", e.getMessage()));
         }
     }
+
+    /**
+     * Khôi phục cấu hình lương đã xóa
+     */
+    @PutMapping("/{maCauHinh}/restore")
+    @Operation(summary = "Khôi phục cấu hình lương đã xóa")
+    public ResponseEntity<?> restoreCauHinhLuong(@PathVariable Integer maCauHinh) {
+        try {
+            CauHinhLuong restoredCauHinh = cauHinhLuongService.restoreCauHinhLuong(maCauHinh);
+            return ResponseEntity.ok(restoredCauHinh);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    /**
+     * Xóa cứng cấu hình lương (xóa vĩnh viễn)
+     */
+    @DeleteMapping("/{maCauHinh}/hard")
+    @Operation(summary = "Xóa cứng cấu hình lương (xóa vĩnh viễn)")
+    public ResponseEntity<?> hardDeleteCauHinhLuong(@PathVariable Integer maCauHinh) {
+        try {
+            cauHinhLuongService.hardDeleteCauHinhLuong(maCauHinh);
+            return ResponseEntity.ok(Map.of("message", "Xóa vĩnh viễn cấu hình lương thành công"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
 }

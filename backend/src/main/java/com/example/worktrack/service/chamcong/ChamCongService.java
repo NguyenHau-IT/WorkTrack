@@ -61,6 +61,16 @@ public interface ChamCongService {
     void deleteChamCong(Integer maChamCong);
 
     /**
+     * Khôi phục bản ghi chấm công đã xóa
+     */
+    ChamCong restoreChamCong(Integer maChamCong);
+
+    /**
+     * Xóa vĩnh viễn bản ghi chấm công (hard delete)
+     */
+    void hardDeleteChamCong(Integer maChamCong);
+
+    /**
      * Lấy bản ghi chấm công đang active (chưa checkout)
      */
     Optional<ChamCong> getActiveChamCong(Integer maNV);
