@@ -49,20 +49,21 @@ class ChamCongService {
     return ChamCong.fromJson(json.decode(response.body));
   }
 
-  /// Chấm công vào (chỉ ghi nhận giờ vào)
-  Future<ChamCong> chamCongVao(int maNV, {String phuongThuc = 'ThuCong'}) async {
-    final response = await _apiService.post('$endpoint/vao', body: {
+  /// Chấm công vào (check-in)
+  Future<ChamCong> chamCongVao(int maNV, {String phuongThuc = 'ThuCong', String? ghiChu}) async {
+    final response = await _apiService.post('$endpoint/checkin', body: {
       'maNV': maNV,
       'phuongThuc': phuongThuc,
-      'gioVao': DateTime.now().toIso8601String(),
+      'ghiChu': ghiChu,
     });
     return ChamCong.fromJson(json.decode(response.body));
   }
 
-  /// Chấm công ra (cập nhật giờ ra cho bản ghi hiện tại)
-  Future<ChamCong> chamCongRa(int maChamCong) async {
-    final response = await _apiService.put('$endpoint/ra/$maChamCong', body: {
-      'gioRa': DateTime.now().toIso8601String(),
+  /// Chấm công ra (check-out)
+  Future<ChamCong> chamCongRa(int maNV, {String? ghiChu}) async {
+    final response = await _apiService.post('$endpoint/checkout', body: {
+      'maNV': maNV,
+      'ghiChu': ghiChu,
     });
     return ChamCong.fromJson(json.decode(response.body));
   }
@@ -83,11 +84,15 @@ class ChamCongService {
     await _apiService.put('$endpoint/restore/$maChamCong');
   }
 
-  /// Lấy bản ghi chấm công hiện tại của nhân viên (chưa chấm công ra)
+  /// Lấy bản ghi chấm công hiện tại của nhân viên (đang chấm công)
   Future<ChamCong?> getChamCongHienTai(int maNV) async {
     try {
-      final response = await _apiService.get('$endpoint/hientai/$maNV');
-      return ChamCong.fromJson(json.decode(response.body));
+      final response = await _apiService.get('$endpoint/nhanvien/$maNV/status');
+      final data = json.decode(response.body);
+      if (data['status'] == 'checked-in' && data['chamCong'] != null) {
+        return ChamCong.fromJson(data['chamCong']);
+      }
+      return null;
     } catch (e) {
       return null; // Không có bản ghi chấm công hiện tại
     }

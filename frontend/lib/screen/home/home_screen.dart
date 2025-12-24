@@ -3,6 +3,8 @@ import '../vaitro/danh_sach_vai_tro_screen.dart';
 import '../nhan_vien/danh_sach_nhan_vien_screen.dart';
 import '../profile/profile_screen.dart';
 import '../cham_cong/danh_sach_cham_cong_screen.dart';
+import '../cham_cong/ghi_nfc_screen.dart';
+import '../cham_cong/doc_nfc_cham_cong_screen.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -195,6 +197,34 @@ class HomeScreen extends StatelessWidget {
               );
             },
           ),
+          _buildMenuCard(
+            context,
+            icon: Icons.nfc,
+            title: 'Ghi Thẻ NFC',
+            color: Colors.teal,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const GhiNFCScreen(),
+                ),
+              );
+            },
+          ),
+          _buildMenuCard(
+            context,
+            icon: Icons.touch_app,
+            title: 'Chấm Công NFC',
+            color: Colors.cyan,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DocNFCChamCongScreen(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -238,10 +268,18 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.access_time, color: Colors.blue),
-                      title: const Text('Chấm công'),
-                      subtitle: const Text('Đang phát triển'),
-                      trailing: const Icon(Icons.lock_outline),
+                      leading: const Icon(Icons.touch_app, color: Colors.cyan),
+                      title: const Text('Chấm công NFC'),
+                      subtitle: const Text('Quét thẻ để chấm công'),
+                      trailing: const Icon(Icons.arrow_forward_ios),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DocNFCChamCongScreen(),
+                          ),
+                        );
+                      },
                     ),
                     const Divider(),
                     ListTile(
