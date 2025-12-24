@@ -11,6 +11,7 @@ analyzer:
   errors:
     avoid_print: ignore
     dead_code: ignore
+    deprecated_member_use: ignore
     library_private_types_in_public_api: ignore
     sort_child_properties_last: ignore
     unused_element: ignore

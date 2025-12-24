@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../vaitro/danh_sach_vai_tro_screen.dart';
 import '../nhan_vien/danh_sach_nhan_vien_screen.dart';
 import '../profile/profile_screen.dart';
+import '../cham_cong/danh_sach_cham_cong_screen.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -124,6 +125,7 @@ class HomeScreen extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
+        childAspectRatio: 1.1,
         children: [
           _buildMenuCard(
             context,
@@ -156,12 +158,13 @@ class HomeScreen extends StatelessWidget {
           _buildMenuCard(
             context,
             icon: Icons.access_time,
-            title: 'Chấm Công',
+            title: 'Quản lý Chấm Công',
             color: Colors.green,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DanhSachChamCongScreen(),
                 ),
               );
             },
@@ -181,22 +184,9 @@ class HomeScreen extends StatelessWidget {
           ),
           _buildMenuCard(
             context,
-            icon: Icons.settings,
-            title: 'Cài Đặt',
-            color: Colors.grey,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển'),
-                ),
-              );
-            },
-          ),
-          _buildMenuCard(
-            context,
             icon: Icons.bar_chart,
             title: 'Thống Kê',
-            color: Colors.teal,
+            color: Colors.deepPurple,
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -292,22 +282,25 @@ class HomeScreen extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 48,
+                size: 40,
                 color: color,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
