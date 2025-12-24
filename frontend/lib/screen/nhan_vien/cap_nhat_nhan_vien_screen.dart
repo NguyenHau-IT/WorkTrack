@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../services/nhan_vien/nhan_vien_service.dart';
 import '../../services/vaitro/vai_tro_service.dart';
+import '../../services/biometric/biometric_service.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 import '../../model/vaitro/vai_tro.dart';
+import 'dart:convert';
 
 class CapNhatNhanVienScreen extends StatefulWidget {
   final NhanVien nhanVien;
@@ -26,7 +28,9 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
   late TextEditingController _theNFCController;
   final _nhanVienService = NhanVienService();
   final _vaiTroService = VaiTroService();
+  final _biometricService = BiometricService();
   bool _isLoading = false;
+  bool _isRegisteringFingerprint = false;
   
   List<VaiTro> _danhSachVaiTro = [];
   int? _selectedVaiTro;
@@ -129,6 +133,93 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
             _isLoading = false;
           });
         }
+      }
+    }
+  }
+
+  Future<void> _registerFingerprintDirect() async {
+    setState(() => _isRegisteringFingerprint = true);
+
+    try {
+      // Kiểm tra hỗ trợ vân tay
+      final canCheck = await _biometricService.canCheckBiometrics();
+      if (!canCheck) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Thiết bị chưa đăng ký vân tay. Vui lòng đăng ký trong cài đặt hệ thống.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Hiển thị thông báo
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Vui lòng đặt vân tay lên cảm biến...'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      // Yêu cầu xác thực vân tay
+      final didAuthenticate = await _biometricService.authenticate(
+        localizedReason: 'Đặt vân tay để đăng ký cho ${widget.nhanVien.hoTen}',
+        biometricOnly: false,
+      );
+
+      if (didAuthenticate) {
+        // Tạo fingerprint hash
+        final fingerprintHash = base64Encode(
+          utf8.encode('${widget.nhanVien.maNV}_fingerprint_${DateTime.now().millisecondsSinceEpoch}')
+        );
+
+        // Gửi lên server
+        await _nhanVienService.updateVanTay(
+          widget.nhanVien.maNV!,
+          fingerprintHash,
+        );
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('✅ Đăng ký vân tay thành công!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('❌ Xác thực vân tay thất bại. Vui lòng thử lại.'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error registering fingerprint: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isRegisteringFingerprint = false);
       }
     }
   }
@@ -319,7 +410,31 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
                 },
                 maxLength: 11,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+
+              // Nút đăng ký vân tay
+              OutlinedButton.icon(
+                onPressed: _isRegisteringFingerprint ? null : _registerFingerprintDirect,
+                icon: _isRegisteringFingerprint
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Icon(Icons.fingerprint),
+                label: Text(_isRegisteringFingerprint ? 'Đang đăng ký...' : 'Đăng ký vân tay'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Colors.blue, width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Nút cập nhật
               ElevatedButton(

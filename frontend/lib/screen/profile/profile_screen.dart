@@ -253,10 +253,10 @@ class ProfileScreen extends StatelessWidget {
                           subtitle: const Text('Vân tay, khuôn mặt'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Tính năng đang phát triển'),
-                              ),
+                            Navigator.pushNamed(
+                              context,
+                              '/biometric-setup',
+                              arguments: nhanVien,
                             );
                           },
                         ),

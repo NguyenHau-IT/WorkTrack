@@ -65,6 +65,17 @@ class ApiService {
     return response;
   }
 
+  Future<http.Response> patch(String endpoint, {Map<String, dynamic>? body}) async {
+    final headers = await _getHeaders();
+    final response = await http.patch(
+      Uri.parse('$baseUrl$endpoint'),
+      headers: headers,
+      body: body != null ? json.encode(body) : null,
+    );
+    _handleResponse(response);
+    return response;
+  }
+
   void _handleResponse(http.Response response) {
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw Exception('HTTP Error: ${response.statusCode}, ${response.body}');

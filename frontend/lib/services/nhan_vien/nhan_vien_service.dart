@@ -77,6 +77,12 @@ class NhanVienService {
     });
   }
 
+  Future<void> updateVanTay(int maNV, String vanTayData) async {
+    await _apiService.patch('$endpoint/$maNV/vantay', body: {
+      'vanTay': vanTayData,
+    });
+  }
+
   Future<void> logout() async {
     await _apiService.post('$endpoint/logout');
   }
