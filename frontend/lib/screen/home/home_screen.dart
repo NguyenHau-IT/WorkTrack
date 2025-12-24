@@ -6,6 +6,7 @@ import '../cham_cong/danh_sach_cham_cong_screen.dart';
 import '../cham_cong/ghi_nfc_screen.dart';
 import '../cham_cong/doc_nfc_cham_cong_screen.dart';
 import '../cau_hinh_luong/danh_sach_cau_hinh_luong_screen.dart';
+import '../baocao/danh_sach_bao_cao_screen.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -192,9 +193,10 @@ class HomeScreen extends StatelessWidget {
             title: 'Báo Cáo Lương',
             color: Colors.purple,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DanhSachBaoCaoScreen(),
                 ),
               );
             },

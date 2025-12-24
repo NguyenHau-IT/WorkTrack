@@ -71,12 +71,14 @@ public class ChamCongController {
     /**
      * Lấy bản ghi chấm công của nhân viên theo khoảng thời gian
      */
-    @GetMapping("/nhanvien/{maNV}/daterange")
+    @GetMapping("/nhanvien/{maNV}/range")
     @Operation(summary = "Lấy bản ghi chấm công của nhân viên theo khoảng thời gian")
     public ResponseEntity<List<ChamCong>> getChamCongByNhanVienAndDateRange(
             @PathVariable Integer maNV,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime tuNgay,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime denNgay) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        LocalDateTime tuNgay = startDate.atStartOfDay();
+        LocalDateTime denNgay = endDate.atTime(23, 59, 59);
         List<ChamCong> chamCongs = chamCongService.getChamCongByMaNVAndDateRange(maNV, tuNgay, denNgay);
         return ResponseEntity.ok(chamCongs);
     }

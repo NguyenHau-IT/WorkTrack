@@ -43,6 +43,15 @@ class ChamCongService {
     return data.map((json) => ChamCong.fromJson(json)).toList();
   }
 
+  /// Lấy chấm công của nhân viên theo khoảng thời gian
+  Future<List<ChamCong>> getChamCongByNhanVienAndDateRange(int maNV, DateTime startDate, DateTime endDate) async {
+    final startStr = startDate.toIso8601String().split('T')[0];
+    final endStr = endDate.toIso8601String().split('T')[0];
+    final response = await _apiService.get('$endpoint/nhanvien/$maNV/range?startDate=$startStr&endDate=$endStr');
+    final List<dynamic> data = json.decode(response.body);
+    return data.map((json) => ChamCong.fromJson(json)).toList();
+  }
+
   /// Tạo bản ghi chấm công mới
   Future<ChamCong> createChamCong(ChamCong chamCong) async {
     final response = await _apiService.post(endpoint, body: chamCong.toJson());
