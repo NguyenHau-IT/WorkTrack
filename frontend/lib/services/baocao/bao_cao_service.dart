@@ -3,7 +3,7 @@ import '../api/api_service.dart';
 import '../../model/baocao/bao_cao.dart';
 
 class BaoCaoService {
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
   final String endpoint = '/api/v1/baocao';
 
   // Lấy danh sách tất cả báo cáo

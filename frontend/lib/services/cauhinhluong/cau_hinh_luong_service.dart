@@ -3,7 +3,7 @@ import '../api/api_service.dart';
 import '../../model/cauhinhluong/cau_hinh_luong.dart';
 
 class CauHinhLuongService {
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
   final String endpoint = '/api/v1/cauhinhluong';
 
   // Lấy danh sách tất cả cấu hình lương

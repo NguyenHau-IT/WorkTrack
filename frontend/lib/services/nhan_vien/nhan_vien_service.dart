@@ -3,7 +3,7 @@ import '../api/api_service.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 
 class NhanVienService {
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
   final String endpoint = '/api/v1/nhanvien';
 
   Future<List<NhanVien>> getAllNhanVien() async {
@@ -49,12 +49,17 @@ class NhanVienService {
     return json.decode(response.body)['exists'];
   }
 
-  Future<NhanVien> login(String tenDangNhap, String matKhau) async {
+  Future<Map<String, dynamic>> login(String tenDangNhap, String matKhau) async {
     final response = await _apiService.post('$endpoint/login', body: {
       'tenDangNhap': tenDangNhap,
       'matKhau': matKhau,
     });
-    return NhanVien.fromJson(json.decode(response.body)['nhanVien']);
+    
+    final responseData = json.decode(response.body);
+    return {
+      'token': responseData['token'],
+      'nhanVien': NhanVien.fromJson(responseData['nhanVien']),
+    };
   }
 
   Future<void> changePassword(String tenDangNhap, String oldPassword, String newPassword) async {

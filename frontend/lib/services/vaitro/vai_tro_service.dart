@@ -3,7 +3,7 @@ import '../../model/vaitro/vai_tro.dart';
 import '../api/api_service.dart';
 
 class VaiTroService {
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
   final String endpoint = '/api/v1/vaitro';
 
   // Thêm vai trò mới

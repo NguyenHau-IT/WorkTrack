@@ -1,6 +1,7 @@
 package com.example.worktrack.controller.nhanvien;
 
 import com.example.worktrack.model.nhanvien.NhanVien;
+import com.example.worktrack.security.JwtUtil;
 import com.example.worktrack.service.nhanvien.NhanVienService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,7 @@ import java.util.Optional;
 public class NhanVienController {
 
     private final NhanVienService nhanVienService;
+    private final JwtUtil jwtUtil;
 
     /**
      * Lấy tất cả nhân viên
@@ -270,8 +272,27 @@ public class NhanVienController {
 
         if (nhanVienOpt.isPresent()) {
             NhanVien nhanVien = nhanVienOpt.get();
+
+            // Kiểm tra nếu nhân viên đã bị xóa
+            if (nhanVien.getDaXoa()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Tài khoản đã bị vô hiệu hóa"));
+            }
+
             if (nhanVien.getMatKhau().equals(matKhau)) {
-                return ResponseEntity.ok(Map.of("message", "Đăng nhập thành công", "nhanVien", nhanVien));
+                // Lấy tên vai trò
+                String tenVaiTro = nhanVien.getVaiTro() != null ? nhanVien.getVaiTro().getTenVaiTro() : "USER";
+
+                // Generate JWT token
+                String token = jwtUtil.generateToken(
+                        tenDangNhap,
+                        nhanVien.getMaNV(),
+                        tenVaiTro);
+
+                return ResponseEntity.ok(Map.of(
+                        "message", "Đăng nhập thành công",
+                        "token", token,
+                        "nhanVien", nhanVien));
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("message", "Mật khẩu không chính xác"));

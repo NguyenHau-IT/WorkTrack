@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../model/nhanvien/nhan_vien.dart';
+import '../../services/auth/auth_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   final NhanVien nhanVien;
@@ -294,9 +295,21 @@ class ProfileScreen extends StatelessWidget {
                                 child: const Text('Hủy'),
                               ),
                               TextButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   Navigator.pop(context);
-                                  Navigator.pushReplacementNamed(context, '/login');
+                                  
+                                  // Xóa token và dữ liệu đăng nhập
+                                  final authService = AuthService();
+                                  await authService.logout();
+                                  
+                                  // Xóa toàn bộ navigation stack và chuyển về login
+                                  if (context.mounted) {
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context, 
+                                      '/login', 
+                                      (route) => false,
+                                    );
+                                  }
                                 },
                                 style: TextButton.styleFrom(
                                   foregroundColor: Colors.red,

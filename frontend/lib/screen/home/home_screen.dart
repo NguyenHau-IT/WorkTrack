@@ -8,9 +8,21 @@ import '../cham_cong/doc_nfc_cham_cong_screen.dart';
 import '../cau_hinh_luong/danh_sach_cau_hinh_luong_screen.dart';
 import '../baocao/danh_sach_bao_cao_screen.dart';
 import '../../model/nhanvien/nhan_vien.dart';
+import '../../services/auth/auth_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    // Xóa dữ liệu đăng nhập
+    final authService = AuthService();
+    await authService.logout();
+    
+    // Chuyển về màn hình login
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +87,7 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Đăng xuất',
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
-            },
+            onPressed: () => _logout(context),
           ),
         ],
       ),

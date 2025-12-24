@@ -3,7 +3,7 @@ import '../api/api_service.dart';
 import '../../model/chamcong/cham_cong.dart';
 
 class ChamCongService {
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
   final String endpoint = '/api/v1/chamcong';
 
   /// Lấy tất cả bản ghi chấm công
