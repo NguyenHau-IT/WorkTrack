@@ -92,6 +92,14 @@ public class VaiTroServiceImpl implements VaiTroService {
     }
 
     @Override
+    public void hardDeleteVaiTro(Integer maVaiTro) {
+        if (!vaiTroRepository.existsById(maVaiTro)) {
+            throw new IllegalArgumentException("Không tìm thấy vai trò với mã: " + maVaiTro);
+        }
+        vaiTroRepository.deleteById(maVaiTro);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public boolean isVaiTroExists(String tenVaiTro) {
         return vaiTroRepository.existsByTenVaiTro(tenVaiTro);

@@ -48,6 +48,11 @@ public interface NhanVienService {
     void restoreNhanVien(Integer maNV);
 
     /**
+     * Xóa cứng nhân viên (xóa vĩnh viễn)
+     */
+    void hardDeleteNhanVien(Integer maNV);
+
+    /**
      * Tìm kiếm nhân viên theo tên
      */
     List<NhanVien> searchNhanVienByName(String keyword);

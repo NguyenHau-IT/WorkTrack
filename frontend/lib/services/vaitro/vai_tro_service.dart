@@ -3,7 +3,7 @@ import '../../model/vaitro/vai_tro.dart';
 import '../api/api_service.dart';
 
 class VaiTroService {
-  final ApiService _apiService = const ApiService();
+  final ApiService _apiService = ApiService();
   final String endpoint = '/api/v1/vaitro';
 
   // Thêm vai trò mới
@@ -37,5 +37,10 @@ class VaiTroService {
   // Khôi phục vai trò
   Future<void> khoiPhucVaiTro(int id) async {
     await _apiService.put('$endpoint/restore/$id');
+  }
+
+  // Xóa cứng vai trò (hard delete)
+  Future<void> hardDeleteVaiTro(int id) async {
+    await _apiService.delete('$endpoint/$id/hard');
   }
 }

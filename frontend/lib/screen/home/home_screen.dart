@@ -2,10 +2,27 @@ import 'package:flutter/material.dart';
 import '../vaitro/danh_sach_vai_tro_screen.dart';
 import '../nhan_vien/danh_sach_nhan_vien_screen.dart';
 import '../profile/profile_screen.dart';
+import '../cham_cong/danh_sach_cham_cong_screen.dart';
+import '../cham_cong/ghi_nfc_screen.dart';
+import '../cham_cong/doc_nfc_cham_cong_screen.dart';
+import '../cau_hinh_luong/danh_sach_cau_hinh_luong_screen.dart';
+import '../baocao/danh_sach_bao_cao_screen.dart';
 import '../../model/nhanvien/nhan_vien.dart';
+import '../../services/auth/auth_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  Future<void> _logout(BuildContext context) async {
+    // Xóa dữ liệu đăng nhập
+    final authService = AuthService();
+    await authService.logout();
+    
+    // Chuyển về màn hình login
+    if (context.mounted) {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +87,7 @@ class HomeScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Đăng xuất',
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/login');
-            },
+            onPressed: () => _logout(context),
           ),
         ],
       ),
@@ -124,6 +139,7 @@ class HomeScreen extends StatelessWidget {
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
+        childAspectRatio: 1.1,
         children: [
           _buildMenuCard(
             context,
@@ -156,12 +172,27 @@ class HomeScreen extends StatelessWidget {
           _buildMenuCard(
             context,
             icon: Icons.access_time,
-            title: 'Chấm Công',
+            title: 'Quản lý Chấm Công',
             color: Colors.green,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DanhSachChamCongScreen(),
+                ),
+              );
+            },
+          ),
+          _buildMenuCard(
+            context,
+            icon: Icons.settings,
+            title: 'Cấu Hình Lương',
+            color: Colors.indigo,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DanhSachCauHinhLuongScreen(),
                 ),
               );
             },
@@ -172,22 +203,10 @@ class HomeScreen extends StatelessWidget {
             title: 'Báo Cáo Lương',
             color: Colors.purple,
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển'),
-                ),
-              );
-            },
-          ),
-          _buildMenuCard(
-            context,
-            icon: Icons.settings,
-            title: 'Cài Đặt',
-            color: Colors.grey,
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển'),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DanhSachBaoCaoScreen(),
                 ),
               );
             },
@@ -196,11 +215,39 @@ class HomeScreen extends StatelessWidget {
             context,
             icon: Icons.bar_chart,
             title: 'Thống Kê',
-            color: Colors.teal,
+            color: Colors.deepPurple,
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Tính năng đang phát triển'),
+                ),
+              );
+            },
+          ),
+          _buildMenuCard(
+            context,
+            icon: Icons.nfc,
+            title: 'Ghi Thẻ NFC',
+            color: Colors.teal,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const GhiNFCScreen(),
+                ),
+              );
+            },
+          ),
+          _buildMenuCard(
+            context,
+            icon: Icons.touch_app,
+            title: 'Chấm Công NFC',
+            color: Colors.cyan,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const DocNFCChamCongScreen(),
                 ),
               );
             },
@@ -248,10 +295,18 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.access_time, color: Colors.blue),
-                      title: const Text('Chấm công'),
-                      subtitle: const Text('Đang phát triển'),
-                      trailing: const Icon(Icons.lock_outline),
+                      leading: const Icon(Icons.touch_app, color: Colors.cyan),
+                      title: const Text('Chấm công NFC'),
+                      subtitle: const Text('Quét thẻ để chấm công'),
+                      trailing: const Icon(Icons.arrow_forward_ios),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const DocNFCChamCongScreen(),
+                          ),
+                        );
+                      },
                     ),
                     const Divider(),
                     ListTile(
@@ -292,22 +347,25 @@ class HomeScreen extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
-                size: 48,
+                size: 40,
                 color: color,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
               ),
