@@ -121,147 +121,26 @@ class _TaoBaoCaoScreenState extends State<TaoBaoCaoScreen> {
     setState(() => _isCalculating = true);
 
     try {
-      // Lấy dữ liệu chấm công
-      final chamCongList = await _chamCongService.getChamCongByNhanVienAndDateRange(
+      // Gọi API backend để tính lương thay vì xử lý ở frontend
+      final result = await _baoCaoService.calculateSalaryDetails(
         _selectedNhanVien!.maNV!,
         _tuNgay!,
         _denNgay!,
+        _cauHinhLuong!.luongGio,
+        _cauHinhLuong!.luongLamThem,
       );
 
-      // Lọc bỏ các bản ghi chấm công đã xóa
-      final chamCongHopLe = chamCongList.where((cc) => !cc.daXoa).toList();
-
-      // Tính toán
-      double tongGio = 0;
-      double gioLamChinh = 0;
-      int soNgayDiTre = 0;
-      int soNgayVeSom = 0;
-      int soNgayCoChamCong = 0;
-      List<ChiTietNgay> chiTietTungNgay = []; // Lưu chi tiết từng ngày
-
-      for (var cc in chamCongHopLe) {
-        if (cc.gioVao != null && cc.gioRa != null) {
-          // Tính số giờ làm việc trong ngày
-          final duration = cc.gioRa!.difference(cc.gioVao!);
-          final totalHours = duration.inMinutes / 60.0;
-          tongGio += totalHours;
-          
-          // Tính giờ làm chính (sáng 7-11h, chiều 13-17h)
-          final gioVao = cc.gioVao!;
-          final gioRa = cc.gioRa!;
-          
-          double gioChinhTrongNgay = 0;
-          
-          // Ca sáng: 7h - 11h (4 tiếng)
-          final sang7h = DateTime(gioVao.year, gioVao.month, gioVao.day, 7, 0);
-          final sang11h = DateTime(gioVao.year, gioVao.month, gioVao.day, 11, 0);
-          
-          // Xử lý giờ vào/ra trong ca sáng
-          DateTime batDauSang = gioVao;
-          DateTime ketThucSang = gioRa;
-          
-          // Nếu giờ vào nằm giữa 11h-13h, không tính ca sáng
-          if (gioVao.hour >= 11 && gioVao.hour < 13) {
-            // Giờ vào trong giờ nghỉ trưa, bỏ qua ca sáng
-            batDauSang = DateTime(gioVao.year, gioVao.month, gioVao.day, 13, 0); // Sẽ không vào ca sáng
-          } else if (gioVao.isBefore(sang7h)) {
-            batDauSang = sang7h;
-          }
-          
-          // Nếu giờ ra nằm giữa 11h-13h, tính đến 11h
-          if (gioRa.hour >= 11 && gioRa.hour < 13) {
-            ketThucSang = sang11h;
-          } else if (gioRa.isAfter(sang11h)) {
-            ketThucSang = sang11h;
-          }
-          
-          // Chỉ tính ca sáng nếu thời gian hợp lệ và không vào giữa giờ nghỉ trưa
-          if (ketThucSang.isAfter(batDauSang) && batDauSang.isBefore(sang11h)) {
-            gioChinhTrongNgay += ketThucSang.difference(batDauSang).inMinutes / 60.0;
-          }
-          
-          // Ca chiều: 13h - 17h (4 tiếng)
-          final chieu13h = DateTime(gioVao.year, gioVao.month, gioVao.day, 13, 0);
-          final chieu17h = DateTime(gioVao.year, gioVao.month, gioVao.day, 17, 0);
-          
-          // Xử lý giờ vào/ra trong ca chiều
-          DateTime batDauChieu = gioVao;
-          DateTime ketThucChieu = gioRa;
-          
-          // Nếu giờ vào nằm giữa 11h-13h, tính từ 13h
-          if (gioVao.hour >= 11 && gioVao.hour < 13) {
-            batDauChieu = chieu13h;
-          } else if (gioVao.isBefore(chieu13h)) {
-            batDauChieu = chieu13h;
-          }
-          
-          // Nếu giờ ra sau 17h thì chỉ tính đến 17h
-          if (gioRa.isAfter(chieu17h)) {
-            ketThucChieu = chieu17h;
-          }
-          
-          // Chỉ tính ca chiều nếu thời gian hợp lệ
-          if (ketThucChieu.isAfter(batDauChieu) && gioRa.isAfter(chieu13h)) {
-            gioChinhTrongNgay += ketThucChieu.difference(batDauChieu).inMinutes / 60.0;
-          }
-          
-          gioLamChinh += gioChinhTrongNgay;
-          
-          // Tính giờ làm thêm cho ngày này (tổng giờ - giờ chính - 2h nghỉ trưa)
-          final gioLamThemNgay = (totalHours - gioChinhTrongNgay - 2.0) > 0 
-              ? totalHours - gioChinhTrongNgay - 2.0 
-              : 0.0;
-          
-          // Lưu chi tiết ngày
-          chiTietTungNgay.add(ChiTietNgay(
-            ngay: DateTime(gioVao.year, gioVao.month, gioVao.day),
-            gioVao: gioVao,
-            gioRa: gioRa,
-            tongGio: totalHours,
-            gioLamChinh: gioChinhTrongNgay,
-            gioLamThem: gioLamThemNgay,
-          ));
-          
-          // Đếm số ngày có chấm công đầy đủ
-          soNgayCoChamCong++;
-        }
-        
-        // Đếm số ngày đi trễ (sau 8:00)
-        if (cc.gioVao != null) {
-          final gioVao = TimeOfDay.fromDateTime(cc.gioVao!);
-          if (gioVao.hour > 8 || (gioVao.hour == 8 && gioVao.minute > 0)) {
-            soNgayDiTre++;
-          }
-        }
-        
-        // Đếm số ngày về sớm (trước 17:00)
-        if (cc.gioRa != null) {
-          final gioRa = TimeOfDay.fromDateTime(cc.gioRa!);
-          if (gioRa.hour < 17) {
-            soNgayVeSom++;
-          }
-        }
-      }
-
-      // Tính giờ làm thêm: tổng giờ - giờ làm chính - 2 tiếng nghỉ trưa (nếu làm cả ngày)
-      final gioNghiTruaUocTinh = soNgayCoChamCong * 2.0; // Mỗi ngày trừ 2 tiếng nghỉ
-      final gioLamThem = (tongGio - gioLamChinh - gioNghiTruaUocTinh) > 0 
-          ? tongGio - gioLamChinh - gioNghiTruaUocTinh 
-          : 0.0;
-
-      // Tính lương
-      final luongChinh = gioLamChinh * _cauHinhLuong!.luongGio;
-      final luongThem = gioLamThem * _cauHinhLuong!.luongLamThem;
-      final tongLuong = luongChinh + luongThem;
-
       setState(() {
-        _tongGio = tongGio;
-        _gioLamChinh = gioLamChinh;
-        _gioLamThem = gioLamThem;
-        _soNgayDiTre = soNgayDiTre;
-        _soNgayVeSom = soNgayVeSom;
-        _luong = tongLuong.toDouble();
-        _chiTietTungNgay = chiTietTungNgay;
+        _tongGio = result['tongGio']?.toDouble() ?? 0.0;
+        _gioLamChinh = result['gioLamChinh']?.toDouble() ?? 0.0;
+        _gioLamThem = result['gioLamThem']?.toDouble() ?? 0.0;
+        _soNgayDiTre = result['soNgayDiTre']?.toInt() ?? 0;
+        _soNgayVeSom = result['soNgayVeSom']?.toInt() ?? 0;
+        _luong = result['tongLuong']?.toDouble() ?? 0.0;
+        
+        // Tạo chi tiết từng ngày từ dữ liệu backend (nếu có)
+        _chiTietTungNgay = []; // Backend sẽ cung cấp chi tiết này trong tương lai
+        
         _isCalculating = false;
       });
     } catch (e) {

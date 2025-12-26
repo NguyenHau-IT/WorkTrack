@@ -4,6 +4,7 @@ import com.example.worktrack.model.baocao.BaoCao;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,4 +100,20 @@ public interface BaoCaoService {
      * Lấy thống kê tổng quan của tất cả nhân viên trong khoảng thời gian
      */
     Map<String, Object> getOverallStatistics(LocalDate tuNgay, LocalDate denNgay);
+
+    /**
+     * Tính toán lương chi tiết cho nhân viên trong khoảng thời gian
+     */
+    Map<String, Object> calculateSalaryDetails(Integer maNV, LocalDate tuNgay, LocalDate denNgay, BigDecimal luongGio,
+            BigDecimal luongLamThem);
+
+    /**
+     * Validate dữ liệu chấm công
+     */
+    Map<String, Object> validateChamCong(Integer maNV, LocalDateTime gioVao, LocalDateTime gioRa, String phuongThuc);
+
+    /**
+     * Tính toán thống kê cho dashboard
+     */
+    Map<String, Object> calculateDashboardStatistics();
 }

@@ -96,4 +96,19 @@ public interface NhanVienService {
      * Kiểm tra tên đăng nhập đã tồn tại
      */
     boolean isTenDangNhapExists(String tenDangNhap);
+
+    /**
+     * Validate thông tin nhân viên
+     */
+    java.util.Map<String, Object> validateNhanVien(NhanVien nhanVien, Integer existingMaNV);
+
+    /**
+     * Validate email format
+     */
+    boolean isValidEmail(String email);
+
+    /**
+     * Validate phone number format
+     */
+    boolean isValidPhoneNumber(String phoneNumber);
 }
