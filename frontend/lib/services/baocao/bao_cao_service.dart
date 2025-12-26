@@ -4,7 +4,7 @@ import '../../model/baocao/bao_cao.dart';
 
 class BaoCaoService {
   final ApiService _apiService = ApiService();
-  final String endpoint = '/api/v1/baocao';
+  final String endpoint = '/baocao';
 
   // Lấy danh sách tất cả báo cáo
   Future<List<BaoCao>> getAllBaoCao() async {

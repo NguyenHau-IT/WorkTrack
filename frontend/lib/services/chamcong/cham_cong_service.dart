@@ -4,7 +4,7 @@ import '../../model/chamcong/cham_cong.dart';
 
 class ChamCongService {
   final ApiService _apiService = ApiService();
-  final String endpoint = '/api/v1/chamcong';
+  final String endpoint = '/chamcong';
 
   /// Lấy tất cả bản ghi chấm công
   Future<List<ChamCong>> getAllChamCong() async {
