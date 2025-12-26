@@ -191,4 +191,103 @@ public class NhanVienServiceImpl implements NhanVienService {
         nhanVien.setTheNFC(theNFC);
         return nhanVienRepository.save(nhanVien);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Map<String, Object> validateNhanVien(NhanVien nhanVien, Integer existingMaNV) {
+        java.util.Map<String, Object> validation = new java.util.HashMap<>();
+        validation.put("isValid", true);
+        validation.put("errors", new java.util.ArrayList<String>());
+
+        @SuppressWarnings("unchecked")
+        java.util.List<String> errors = (java.util.List<String>) validation.get("errors");
+
+        // Validate họ tên
+        if (nhanVien.getHoTen() == null || nhanVien.getHoTen().trim().isEmpty()) {
+            errors.add("Họ tên không được để trống");
+            validation.put("isValid", false);
+        } else if (nhanVien.getHoTen().trim().length() > 100) {
+            errors.add("Họ tên không được vượt quá 100 ký tự");
+            validation.put("isValid", false);
+        }
+
+        // Validate email
+        if (nhanVien.getEmail() == null || nhanVien.getEmail().trim().isEmpty()) {
+            errors.add("Email không được để trống");
+            validation.put("isValid", false);
+        } else {
+            if (!isValidEmail(nhanVien.getEmail())) {
+                errors.add("Định dạng email không hợp lệ");
+                validation.put("isValid", false);
+            } else if (nhanVien.getEmail().length() > 100) {
+                errors.add("Email không được vượt quá 100 ký tự");
+                validation.put("isValid", false);
+            } else {
+                // Kiểm tra email đã tồn tại (ngoại trừ nhân viên hiện tại)
+                Optional<NhanVien> existingWithEmail = nhanVienRepository.findByEmail(nhanVien.getEmail());
+                if (existingWithEmail.isPresent() &&
+                        (existingMaNV == null || !existingWithEmail.get().getMaNV().equals(existingMaNV))) {
+                    errors.add("Email đã tồn tại trong hệ thống");
+                    validation.put("isValid", false);
+                }
+            }
+        }
+
+        // Validate số điện thoại
+        if (nhanVien.getDienThoai() != null && !nhanVien.getDienThoai().trim().isEmpty()) {
+            if (!isValidPhoneNumber(nhanVien.getDienThoai())) {
+                errors.add("Số điện thoại không hợp lệ (chỉ chấp nhận 10-11 chữ số)");
+                validation.put("isValid", false);
+            } else if (nhanVien.getDienThoai().length() > 11) {
+                errors.add("Số điện thoại không được vượt quá 11 ký tự");
+                validation.put("isValid", false);
+            }
+        }
+
+        // Validate thẻ NFC
+        if (nhanVien.getTheNFC() != null && !nhanVien.getTheNFC().trim().isEmpty()) {
+            if (nhanVien.getTheNFC().trim().length() > 50) {
+                errors.add("Mã thẻ NFC không được vượt quá 50 ký tự");
+                validation.put("isValid", false);
+            } else {
+                // Kiểm tra thẻ NFC đã tồn tại (ngoại trừ nhân viên hiện tại)
+                Optional<NhanVien> existingWithNFC = nhanVienRepository.findByTheNFC(nhanVien.getTheNFC());
+                if (existingWithNFC.isPresent() &&
+                        (existingMaNV == null || !existingWithNFC.get().getMaNV().equals(existingMaNV))) {
+                    errors.add("Mã thẻ NFC đã được sử dụng");
+                    validation.put("isValid", false);
+                }
+            }
+        }
+
+        // Validate mã vai trò
+        if (nhanVien.getMaVaiTro() == null) {
+            errors.add("Vai trò không được để trống");
+            validation.put("isValid", false);
+        }
+
+        return validation;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isValidEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            return false;
+        }
+
+        String emailRegex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
+        return email.matches(emailRegex);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isValidPhoneNumber(String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            return true; // Phone number is optional
+        }
+
+        String phoneRegex = "^[0-9]{10,11}$";
+        return phoneNumber.matches(phoneRegex);
+    }
 }

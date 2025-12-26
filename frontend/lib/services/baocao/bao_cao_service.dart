@@ -91,7 +91,61 @@ class BaoCaoService {
     await _apiService.delete('$endpoint/$maBaoCao/hard');
   }
 
-  // Tính toán thống kê từ báo cáo
+  // Format lương thành chuỗi tiền tệ
+  String formatCurrency(double amount) {
+    return '${amount.toStringAsFixed(0).replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]},',
+    )} ₫';
+  }
+
+  // Tính toán lương chi tiết cho nhân viên (sử dụng API backend)
+  Future<Map<String, dynamic>> calculateSalaryDetails(
+    int maNV, 
+    DateTime tuNgay, 
+    DateTime denNgay, 
+    double luongGio, 
+    double luongLamThem
+  ) async {
+    final response = await _apiService.post(
+      '$endpoint/calculate-salary',
+      body: {
+        'maNV': maNV,
+        'tuNgay': tuNgay.toIso8601String().split('T')[0],
+        'denNgay': denNgay.toIso8601String().split('T')[0],
+        'luongGio': luongGio,
+        'luongLamThem': luongLamThem,
+      },
+    );
+    return json.decode(response.body);
+  }
+
+  // Validate dữ liệu chấm công (sử dụng API backend)
+  Future<Map<String, dynamic>> validateChamCong(
+    int maNV, 
+    DateTime? gioVao, 
+    DateTime? gioRa, 
+    String phuongThuc
+  ) async {
+    final response = await _apiService.post(
+      '$endpoint/validate-chamcong',
+      body: {
+        'maNV': maNV,
+        'gioVao': gioVao?.toIso8601String(),
+        'gioRa': gioRa?.toIso8601String(),
+        'phuongThuc': phuongThuc,
+      },
+    );
+    return json.decode(response.body);
+  }
+
+  // Lấy thống kê dashboard (sử dụng API backend)
+  Future<Map<String, dynamic>> getDashboardStatistics() async {
+    final response = await _apiService.get('$endpoint/dashboard-stats');
+    return json.decode(response.body);
+  }
+
+  // Tính toán thống kê từ báo cáo (không cần thay đổi - giữ nguyên cho backward compatibility)
   Map<String, dynamic> calculateStatistics(BaoCao baoCao) {
     return {
       'tongGio': baoCao.tongGio,
@@ -106,14 +160,6 @@ class BaoCaoService {
   // Tính số ngày giữa 2 ngày
   int _calculateDaysBetween(DateTime from, DateTime to) {
     return to.difference(from).inDays + 1;
-  }
-
-  // Format lương thành chuỗi tiền tệ
-  String formatCurrency(double amount) {
-    return '${amount.toStringAsFixed(0).replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )} ₫';
   }
 
   // Kiểm tra báo cáo có hợp lệ không

@@ -357,4 +357,46 @@ public class NhanVienController {
         // sessions
         return ResponseEntity.ok(Map.of("message", "Đăng xuất thành công"));
     }
+
+    /**
+     * Validate thông tin nhân viên
+     */
+    @PostMapping("/validate")
+    @Operation(summary = "Validate thông tin nhân viên")
+    public ResponseEntity<Map<String, Object>> validateNhanVien(
+            @RequestBody NhanVien nhanVien,
+            @RequestParam(required = false) Integer existingMaNV) {
+        Map<String, Object> validation = nhanVienService.validateNhanVien(nhanVien, existingMaNV);
+        return ResponseEntity.ok(validation);
+    }
+
+    /**
+     * Validate định dạng email
+     */
+    @GetMapping("/validate-email/{email}")
+    @Operation(summary = "Validate định dạng email")
+    public ResponseEntity<Map<String, Object>> validateEmail(@PathVariable String email) {
+        boolean isValid = nhanVienService.isValidEmail(email);
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("isValid", isValid);
+        if (!isValid) {
+            result.put("message", "Định dạng email không hợp lệ");
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Validate số điện thoại
+     */
+    @GetMapping("/validate-phone/{phoneNumber}")
+    @Operation(summary = "Validate số điện thoại")
+    public ResponseEntity<Map<String, Object>> validatePhoneNumber(@PathVariable String phoneNumber) {
+        boolean isValid = nhanVienService.isValidPhoneNumber(phoneNumber);
+        Map<String, Object> result = new java.util.HashMap<>();
+        result.put("isValid", isValid);
+        if (!isValid) {
+            result.put("message", "Số điện thoại không hợp lệ (chỉ chấp nhận 10-11 chữ số)");
+        }
+        return ResponseEntity.ok(result);
+    }
 }
