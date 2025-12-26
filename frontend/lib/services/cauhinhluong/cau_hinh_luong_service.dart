@@ -4,7 +4,7 @@ import '../../model/cauhinhluong/cau_hinh_luong.dart';
 
 class CauHinhLuongService {
   final ApiService _apiService = ApiService();
-  final String endpoint = '/api/v1/cauhinhluong';
+  final String endpoint = '/cauhinhluong';
 
   // Lấy danh sách tất cả cấu hình lương
   Future<List<CauHinhLuong>> getAllCauHinhLuong() async {

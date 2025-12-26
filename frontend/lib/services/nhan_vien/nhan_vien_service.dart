@@ -4,7 +4,7 @@ import '../../model/nhanvien/nhan_vien.dart';
 
 class NhanVienService {
   final ApiService _apiService = ApiService();
-  final String endpoint = '/api/v1/nhanvien';
+  final String endpoint = '/nhanvien';
 
   Future<List<NhanVien>> getAllNhanVien() async {
     final response = await _apiService.get(endpoint);
