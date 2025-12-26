@@ -286,4 +286,67 @@ public class BaoCaoController {
         Map<String, Object> statistics = baoCaoService.getOverallStatistics(tuNgay, denNgay);
         return ResponseEntity.ok(statistics);
     }
+
+    /**
+     * Tính toán lương chi tiết cho nhân viên
+     */
+    @PostMapping("/calculate-salary")
+    @Operation(summary = "Tính toán lương chi tiết cho nhân viên")
+    public ResponseEntity<?> calculateSalaryDetails(@RequestBody Map<String, Object> request) {
+        try {
+            Integer maNV = (Integer) request.get("maNV");
+            LocalDate tuNgay = LocalDate.parse((String) request.get("tuNgay"));
+            LocalDate denNgay = LocalDate.parse((String) request.get("denNgay"));
+            BigDecimal luongGio = new BigDecimal(request.get("luongGio").toString());
+            BigDecimal luongLamThem = new BigDecimal(request.get("luongLamThem").toString());
+
+            Map<String, Object> result = baoCaoService.calculateSalaryDetails(maNV, tuNgay, denNgay, luongGio,
+                    luongLamThem);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Lỗi tính toán lương: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * Validate dữ liệu chấm công
+     */
+    @PostMapping("/validate-chamcong")
+    @Operation(summary = "Validate dữ liệu chấm công")
+    public ResponseEntity<Map<String, Object>> validateChamCong(@RequestBody Map<String, Object> request) {
+        try {
+            Integer maNV = (Integer) request.get("maNV");
+            java.time.LocalDateTime gioVao = null;
+            java.time.LocalDateTime gioRa = null;
+
+            if (request.get("gioVao") != null) {
+                gioVao = java.time.LocalDateTime.parse((String) request.get("gioVao"));
+            }
+            if (request.get("gioRa") != null) {
+                gioRa = java.time.LocalDateTime.parse((String) request.get("gioRa"));
+            }
+
+            String phuongThuc = (String) request.get("phuongThuc");
+
+            Map<String, Object> validation = baoCaoService.validateChamCong(maNV, gioVao, gioRa, phuongThuc);
+            return ResponseEntity.ok(validation);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("isValid", false, "errors", List.of("Lỗi validation: " + e.getMessage())));
+        }
+    }
+
+    /**
+     * Lấy thống kê dashboard
+     */
+    @GetMapping("/dashboard-stats")
+    @Operation(summary = "Lấy thống kê cho dashboard")
+    public ResponseEntity<Map<String, Object>> getDashboardStatistics() {
+        Map<String, Object> stats = baoCaoService.calculateDashboardStatistics();
+        return ResponseEntity.ok(stats);
+    }
 }
