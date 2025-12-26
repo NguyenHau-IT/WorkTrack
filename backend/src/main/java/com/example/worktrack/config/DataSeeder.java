@@ -45,6 +45,14 @@ public class DataSeeder implements CommandLineRunner {
         nhanVien.setDaXoa(false);
         vaiTroRepository.save(nhanVien);
         log.info("✓ Đã tạo vai trò: Nhân viên");
+
+        // Tạo vai trò Quản lý
+        VaiTro quanly = new VaiTro();
+        quanly.setTenVaiTro("Quản lý");
+        quanly.setMoTa("Quản lý cấp trung, có quyền truy cập và quản lý nhân viên");
+        quanly.setDaXoa(false);
+        vaiTroRepository.save(quanly);
+        log.info("✓ Đã tạo vai trò: Quản lý");
     }
 
     private void seedNhanVien() {
@@ -61,6 +69,8 @@ public class DataSeeder implements CommandLineRunner {
         VaiTro nhanVienRole = vaiTroRepository.findByTenVaiTro("Nhân viên")
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Nhân viên"));
 
+        VaiTro quanlyRole = vaiTroRepository.findByTenVaiTro("Quản lý")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy vai trò Quản lý"));
         // Tạo nhân viên Admin mặc định
         NhanVien admin = new NhanVien();
         admin.setHoTen("Administrator");
@@ -89,5 +99,19 @@ public class DataSeeder implements CommandLineRunner {
         log.info("  - Tên đăng nhập: nhanvien");
         log.info("  - Mật khẩu: nhanvien123");
         log.info("  - Email: nhanvien@worktrack.com");
+        // Tạo nhân viên Quản lý mặc định
+        NhanVien quanly = new NhanVien();
+        quanly.setHoTen("Quan Ly");
+        quanly.setEmail("quanly@worktrack.com");
+        quanly.setDienThoai("0112233445");
+        quanly.setMaVaiTro(quanlyRole.getMaVaiTro());
+        quanly.setTenDangNhap("quanly");
+        quanly.setMatKhau("quanly123"); // Trong thực tế nên mã hóa mật khẩu
+        quanly.setDaXoa(false);
+        nhanVienRepository.save(quanly);
+        log.info("✓ Đã tạo nhân viên Quản lý:");
+        log.info("  - Tên đăng nhập: quanly");
+        log.info("  - Mật khẩu: quanly123");
+        log.info("  - Email: quanly@worktrack.com");
     }
 }

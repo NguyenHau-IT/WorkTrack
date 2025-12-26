@@ -4,7 +4,7 @@ import '../api/api_service.dart';
 
 class VaiTroService {
   final ApiService _apiService = ApiService();
-  final String endpoint = '/api/v1/vaitro';
+  final String endpoint = '/vaitro';
 
   // Thêm vai trò mới
   Future<VaiTro> themVaiTro(VaiTro vaiTro) async {
