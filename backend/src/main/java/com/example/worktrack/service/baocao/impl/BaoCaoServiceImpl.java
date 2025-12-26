@@ -298,4 +298,264 @@ public class BaoCaoServiceImpl implements BaoCaoService {
 
         return statistics;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> calculateSalaryDetails(Integer maNV, LocalDate tuNgay, LocalDate denNgay,
+            BigDecimal luongGio, BigDecimal luongLamThem) {
+        // Kiểm tra nhân viên tồn tại
+        if (!nhanVienRepository.existsById(maNV)) {
+            throw new IllegalArgumentException("Không tìm thấy nhân viên với mã: " + maNV);
+        }
+
+        // Lấy dữ liệu chấm công
+        LocalDateTime tuNgayTime = tuNgay.atStartOfDay();
+        LocalDateTime denNgayTime = denNgay.atTime(23, 59, 59);
+        List<ChamCong> chamCongList = chamCongRepository.findByMaNVAndDateRange(maNV, tuNgayTime, denNgayTime);
+
+        // Lọc bỏ các bản ghi đã xóa
+        List<ChamCong> chamCongHopLe = chamCongList.stream()
+                .filter(cc -> !cc.getDaXoa())
+                .toList();
+
+        BigDecimal tongGio = BigDecimal.ZERO;
+        BigDecimal gioLamChinh = BigDecimal.ZERO;
+        int soNgayDiTre = 0;
+        int soNgayVeSom = 0;
+        int soNgayCoChamCong = 0;
+
+        for (ChamCong cc : chamCongHopLe) {
+            if (cc.getGioVao() != null && cc.getGioRa() != null) {
+                // Tính số giờ làm việc trong ngày
+                double durationMinutes = java.time.Duration.between(cc.getGioVao(), cc.getGioRa()).toMinutes();
+                BigDecimal totalHours = BigDecimal.valueOf(durationMinutes / 60.0);
+                tongGio = tongGio.add(totalHours);
+
+                // Tính giờ làm chính (sáng 7-11h, chiều 13-17h)
+                LocalDateTime gioVao = cc.getGioVao();
+                LocalDateTime gioRa = cc.getGioRa();
+
+                BigDecimal gioChinhTrongNgay = BigDecimal.ZERO;
+
+                // Ca sáng: 7h - 11h
+                LocalDateTime sang7h = LocalDateTime.of(gioVao.toLocalDate(), LocalTime.of(7, 0));
+                LocalDateTime sang11h = LocalDateTime.of(gioVao.toLocalDate(), LocalTime.of(11, 0));
+
+                LocalDateTime batDauSang = gioVao;
+                LocalDateTime ketThucSang = gioRa;
+
+                // Điều chỉnh thời gian ca sáng
+                if (gioVao.getHour() >= 11 && gioVao.getHour() < 13) {
+                    // Giờ vào trong giờ nghỉ trưa, bỏ qua ca sáng
+                    batDauSang = LocalDateTime.of(gioVao.toLocalDate(), LocalTime.of(13, 0));
+                } else if (gioVao.isBefore(sang7h)) {
+                    batDauSang = sang7h;
+                }
+
+                if (gioRa.getHour() >= 11 && gioRa.getHour() < 13) {
+                    ketThucSang = sang11h;
+                } else if (gioRa.isAfter(sang11h)) {
+                    ketThucSang = sang11h;
+                }
+
+                // Tính giờ ca sáng
+                if (ketThucSang.isAfter(batDauSang) && batDauSang.isBefore(sang11h)) {
+                    long minutesSang = java.time.Duration.between(batDauSang, ketThucSang).toMinutes();
+                    gioChinhTrongNgay = gioChinhTrongNgay.add(BigDecimal.valueOf(minutesSang / 60.0));
+                }
+
+                // Ca chiều: 13h - 17h
+                LocalDateTime chieu13h = LocalDateTime.of(gioVao.toLocalDate(), LocalTime.of(13, 0));
+                LocalDateTime chieu17h = LocalDateTime.of(gioVao.toLocalDate(), LocalTime.of(17, 0));
+
+                LocalDateTime batDauChieu = gioVao;
+                LocalDateTime ketThucChieu = gioRa;
+
+                if (gioVao.getHour() >= 11 && gioVao.getHour() < 13) {
+                    batDauChieu = chieu13h;
+                } else if (gioVao.isBefore(chieu13h)) {
+                    batDauChieu = chieu13h;
+                }
+
+                if (gioRa.isAfter(chieu17h)) {
+                    ketThucChieu = chieu17h;
+                }
+
+                // Tính giờ ca chiều
+                if (ketThucChieu.isAfter(batDauChieu) && gioRa.isAfter(chieu13h)) {
+                    long minutesChieu = java.time.Duration.between(batDauChieu, ketThucChieu).toMinutes();
+                    gioChinhTrongNgay = gioChinhTrongNgay.add(BigDecimal.valueOf(minutesChieu / 60.0));
+                }
+
+                gioLamChinh = gioLamChinh.add(gioChinhTrongNgay);
+                soNgayCoChamCong++;
+            }
+
+            // Đếm số ngày đi trễ (sau 8:00)
+            if (cc.getGioVao() != null) {
+                LocalTime gioVaoTime = cc.getGioVao().toLocalTime();
+                if (gioVaoTime.isAfter(LocalTime.of(8, 0))) {
+                    soNgayDiTre++;
+                }
+            }
+
+            // Đếm số ngày về sớm (trước 17:00)
+            if (cc.getGioRa() != null) {
+                LocalTime gioRaTime = cc.getGioRa().toLocalTime();
+                if (gioRaTime.isBefore(LocalTime.of(17, 0))) {
+                    soNgayVeSom++;
+                }
+            }
+        }
+
+        // Tính giờ làm thêm: tổng giờ - giờ làm chính - 2 tiếng nghỉ trưa
+        BigDecimal gioNghiTruaUocTinh = BigDecimal.valueOf(soNgayCoChamCong * 2.0);
+        BigDecimal gioLamThem = tongGio.subtract(gioLamChinh).subtract(gioNghiTruaUocTinh);
+        if (gioLamThem.compareTo(BigDecimal.ZERO) < 0) {
+            gioLamThem = BigDecimal.ZERO;
+        }
+
+        // Tính lương
+        BigDecimal luongChinh = gioLamChinh.multiply(luongGio);
+        BigDecimal luongThem = gioLamThem.multiply(luongLamThem);
+        BigDecimal tongLuong = luongChinh.add(luongThem);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("maNV", maNV);
+        result.put("tuNgay", tuNgay);
+        result.put("denNgay", denNgay);
+        result.put("tongGio", tongGio.setScale(2, RoundingMode.HALF_UP));
+        result.put("gioLamChinh", gioLamChinh.setScale(2, RoundingMode.HALF_UP));
+        result.put("gioLamThem", gioLamThem.setScale(2, RoundingMode.HALF_UP));
+        result.put("soNgayDiTre", soNgayDiTre);
+        result.put("soNgayVeSom", soNgayVeSom);
+        result.put("soNgayCoChamCong", soNgayCoChamCong);
+        result.put("luongChinh", luongChinh.setScale(0, RoundingMode.HALF_UP));
+        result.put("luongThem", luongThem.setScale(0, RoundingMode.HALF_UP));
+        result.put("tongLuong", tongLuong.setScale(0, RoundingMode.HALF_UP));
+        result.put("luongGio", luongGio);
+        result.put("luongLamThem", luongLamThem);
+
+        return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> validateChamCong(Integer maNV, LocalDateTime gioVao, LocalDateTime gioRa,
+            String phuongThuc) {
+        Map<String, Object> validation = new HashMap<>();
+        validation.put("isValid", true);
+        validation.put("errors", new java.util.ArrayList<String>());
+
+        @SuppressWarnings("unchecked")
+        java.util.List<String> errors = (java.util.List<String>) validation.get("errors");
+
+        // Kiểm tra nhân viên tồn tại
+        if (!nhanVienRepository.existsById(maNV)) {
+            errors.add("Không tìm thấy nhân viên với mã: " + maNV);
+            validation.put("isValid", false);
+            return validation;
+        }
+
+        // Kiểm tra thời gian không được là tương lai
+        LocalDateTime now = LocalDateTime.now();
+        if (gioVao != null && gioVao.isAfter(now)) {
+            errors.add("Không thể chấm công cho thời gian tương lai");
+            validation.put("isValid", false);
+        }
+
+        if (gioRa != null && gioRa.isAfter(now)) {
+            errors.add("Không thể chấm công ra cho thời gian tương lai");
+            validation.put("isValid", false);
+        }
+
+        // Kiểm tra giờ ra phải sau giờ vào
+        if (gioVao != null && gioRa != null && !gioRa.isAfter(gioVao)) {
+            errors.add("Giờ ra phải sau giờ vào");
+            validation.put("isValid", false);
+        }
+
+        // Kiểm tra đã chấm công trong ngày chưa
+        if (gioVao != null) {
+            LocalDateTime startOfDay = gioVao.toLocalDate().atStartOfDay();
+            LocalDateTime endOfDay = gioVao.toLocalDate().atTime(23, 59, 59);
+            List<ChamCong> existingRecords = chamCongRepository.findByMaNVAndDateRange(maNV, startOfDay, endOfDay)
+                    .stream().filter(cc -> !cc.getDaXoa()).toList();
+
+            if (!existingRecords.isEmpty()) {
+                errors.add("Nhân viên đã chấm công trong ngày này");
+                validation.put("isValid", false);
+            }
+        }
+
+        // Validate phương thức chấm công
+        if (phuongThuc == null || phuongThuc.trim().isEmpty()) {
+            errors.add("Phương thức chấm công không được để trống");
+            validation.put("isValid", false);
+        } else {
+            String[] validMethods = { "ThuCong", "VanTay", "KhuonMat", "NFC" };
+            boolean isValidMethod = false;
+            for (String method : validMethods) {
+                if (method.equals(phuongThuc)) {
+                    isValidMethod = true;
+                    break;
+                }
+            }
+            if (!isValidMethod) {
+                errors.add("Phương thức chấm công không hợp lệ");
+                validation.put("isValid", false);
+            }
+        }
+
+        return validation;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, Object> calculateDashboardStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // Thống kê hôm nay
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
+        List<ChamCong> todayRecords = chamCongRepository.findByDateRange(startOfDay, endOfDay)
+                .stream().filter(cc -> !cc.getDaXoa()).toList();
+
+        int checkedInToday = (int) todayRecords.stream()
+                .filter(cc -> cc.getGioVao() != null)
+                .count();
+
+        int checkedOutToday = (int) todayRecords.stream()
+                .filter(cc -> cc.getGioRa() != null)
+                .count();
+
+        int lateToday = (int) todayRecords.stream()
+                .filter(cc -> cc.getGioVao() != null &&
+                        cc.getGioVao().toLocalTime().isAfter(LocalTime.of(8, 0)))
+                .count();
+
+        // Thống kê tháng này
+        LocalDate startOfMonth = today.withDayOfMonth(1);
+        LocalDate endOfMonth = today.withDayOfMonth(today.lengthOfMonth());
+
+        List<BaoCao> monthlyReports = baoCaoRepository.findByDateRange(startOfMonth, endOfMonth);
+        BigDecimal monthlySalary = monthlyReports.stream()
+                .map(BaoCao::getLuong)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal monthlyHours = monthlyReports.stream()
+                .map(BaoCao::getTongGio)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        stats.put("todayCheckedIn", checkedInToday);
+        stats.put("todayCheckedOut", checkedOutToday);
+        stats.put("todayLate", lateToday);
+        stats.put("monthlySalary", monthlySalary.setScale(0, RoundingMode.HALF_UP));
+        stats.put("monthlyHours", monthlyHours.setScale(2, RoundingMode.HALF_UP));
+        stats.put("totalEmployees", nhanVienRepository.count());
+
+        return stats;
+    }
 }

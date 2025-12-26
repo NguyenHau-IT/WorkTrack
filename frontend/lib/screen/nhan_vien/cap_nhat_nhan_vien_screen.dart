@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../services/nhan_vien/nhan_vien_service.dart';
 import '../../services/vaitro/vai_tro_service.dart';
 import '../../services/biometric/biometric_service.dart';
+import '../../services/validation/validation_service.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 import '../../model/vaitro/vai_tro.dart';
 import 'dart:convert';
@@ -11,7 +12,7 @@ class CapNhatNhanVienScreen extends StatefulWidget {
   final NhanVien? currentUser;
 
   const CapNhatNhanVienScreen({
-    super.key, 
+    super.key,
     required this.nhanVien,
     this.currentUser,
   });
@@ -29,9 +30,10 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
   final _nhanVienService = NhanVienService();
   final _vaiTroService = VaiTroService();
   final _biometricService = BiometricService();
+  final _validationService = ValidationService();
   bool _isLoading = false;
   bool _isRegisteringFingerprint = false;
-  
+
   List<VaiTro> _danhSachVaiTro = [];
   int? _selectedVaiTro;
   bool _isLoadingVaiTro = true;
@@ -48,7 +50,7 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
       text: widget.nhanVien.theNFC ?? '',
     );
     _selectedVaiTro = widget.nhanVien.maVaiTro;
-    
+
     if (_isAdmin) {
       _loadVaiTro();
     }
@@ -86,6 +88,43 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
       });
 
       try {
+        // Validate using backend API first
+        final nhanVienData = {
+          'hoTen': _hoTenController.text.trim(),
+          'email': _emailController.text.trim(),
+          'dienThoai': _dienThoaiController.text.trim().isEmpty
+              ? null
+              : _dienThoaiController.text.trim(),
+          'theNFC': _theNFCController.text.trim().isEmpty
+              ? null
+              : _theNFCController.text.trim(),
+          'maVaiTro': _isAdmin ? _selectedVaiTro : widget.nhanVien.maVaiTro,
+        };
+
+        final validation = await _validationService.validateNhanVien(
+          nhanVienData,
+          existingMaNV: widget.nhanVien.maNV,
+        );
+
+        if (!validation['isValid']) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          // Show validation errors
+          final errors = validation['errors'] as List<dynamic>;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errors.join('\n')),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 4),
+              ),
+            );
+          }
+          return;
+        }
+
         final updatedNhanVien = NhanVien(
           maNV: widget.nhanVien.maNV,
           hoTen: _hoTenController.text.trim(),
@@ -147,7 +186,9 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Thiết bị chưa đăng ký vân tay. Vui lòng đăng ký trong cài đặt hệ thống.'),
+              content: Text(
+                'Thiết bị chưa đăng ký vân tay. Vui lòng đăng ký trong cài đặt hệ thống.',
+              ),
               backgroundColor: Colors.orange,
               duration: Duration(seconds: 4),
             ),
@@ -177,7 +218,9 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
       if (didAuthenticate) {
         // Tạo fingerprint hash
         final fingerprintHash = base64Encode(
-          utf8.encode('${widget.nhanVien.maNV}_fingerprint_${DateTime.now().millisecondsSinceEpoch}')
+          utf8.encode(
+            '${widget.nhanVien.maNV}_fingerprint_${DateTime.now().millisecondsSinceEpoch}',
+          ),
         );
 
         // Gửi lên server
@@ -263,7 +306,11 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(Icons.account_circle, color: Colors.grey, size: 20),
+                          const Icon(
+                            Icons.account_circle,
+                            color: Colors.grey,
+                            size: 20,
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Tên đăng nhập: ${widget.nhanVien.tenDangNhap}',
@@ -287,11 +334,9 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
                   prefixIcon: Icon(Icons.person),
                 ),
                 validator: (value) {
+                  // Basic validation - detailed validation handled by backend
                   if (value == null || value.trim().isEmpty) {
                     return 'Họ tên không được để trống';
-                  }
-                  if (value.length > 100) {
-                    return 'Họ tên không được vượt quá 100 ký tự';
                   }
                   return null;
                 },
@@ -310,12 +355,13 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
+                  // Basic validation - detailed validation handled by backend
                   if (value == null || value.trim().isEmpty) {
                     return 'Email không được để trống';
                   }
-                  final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                  if (!emailRegex.hasMatch(value)) {
-                    return 'Email không hợp lệ';
+                  // Basic email format check
+                  if (!_validationService.isValidEmailFormat(value)) {
+                    return 'Định dạng email không hợp lệ';
                   }
                   return null;
                 },
@@ -400,9 +446,9 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
                 ),
                 keyboardType: TextInputType.phone,
                 validator: (value) {
+                  // Basic validation - detailed validation handled by backend
                   if (value != null && value.isNotEmpty) {
-                    final phoneRegex = RegExp(r'^[0-9]{10,11}$');
-                    if (!phoneRegex.hasMatch(value)) {
+                    if (!_validationService.isValidPhoneFormat(value)) {
                       return 'Số điện thoại không hợp lệ (10-11 số)';
                     }
                   }
@@ -414,17 +460,21 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
 
               // Nút đăng ký vân tay
               OutlinedButton.icon(
-                onPressed: _isRegisteringFingerprint ? null : _registerFingerprintDirect,
+                onPressed: _isRegisteringFingerprint
+                    ? null
+                    : _registerFingerprintDirect,
                 icon: _isRegisteringFingerprint
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                        ),
+                        child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.fingerprint),
-                label: Text(_isRegisteringFingerprint ? 'Đang đăng ký...' : 'Đăng ký vân tay'),
+                label: Text(
+                  _isRegisteringFingerprint
+                      ? 'Đang đăng ký...'
+                      : 'Đăng ký vân tay',
+                ),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.blue,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -456,10 +506,7 @@ class _CapNhatNhanVienScreenState extends State<CapNhatNhanVienScreen> {
                           strokeWidth: 2,
                         ),
                       )
-                    : const Text(
-                        'Cập nhật',
-                        style: TextStyle(fontSize: 16),
-                      ),
+                    : const Text('Cập nhật', style: TextStyle(fontSize: 16)),
               ),
             ],
           ),
