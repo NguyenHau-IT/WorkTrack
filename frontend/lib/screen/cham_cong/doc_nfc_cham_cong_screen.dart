@@ -258,9 +258,16 @@ class _DocNFCChamCongScreenState extends State<DocNFCChamCongScreen> {
           SnackBar(
             content: Text(message),
             backgroundColor: bgColor,
-            duration: const Duration(seconds: 3),
+            duration: const Duration(seconds: 2),
           ),
         );
+
+        // Tự động quay về trang trước sau 2 giây
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        });
       }
     } catch (e) {
       if (mounted) {

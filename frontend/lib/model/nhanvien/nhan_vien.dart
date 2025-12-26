@@ -68,4 +68,13 @@ class NhanVien {
     }
     return false;
   }
+
+  // Helper method để kiểm tra quyền manager
+  bool get isManager {
+    if (vaiTro != null && vaiTro!['tenVaiTro'] != null) {
+      String roleName = vaiTro!['tenVaiTro'].toString().toLowerCase();
+      return roleName == 'manager' || roleName == 'quanly' || roleName == 'quản lý';
+    }
+    return false;
+  }
 }

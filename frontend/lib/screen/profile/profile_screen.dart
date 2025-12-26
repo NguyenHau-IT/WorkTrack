@@ -12,17 +12,18 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Thông Tin Cá Nhân'),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
             tooltip: 'Chỉnh sửa',
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Tính năng đang phát triển'),
-                ),
+              // Điều hướng đến trang cập nhật
+              Navigator.pushNamed(
+                context,
+                '/cap-nhat-nhan-vien',
+                arguments: {'nhanVien': nhanVien, 'currentUser': nhanVien},
               );
             },
           ),
@@ -38,7 +39,7 @@ class ProfileScreen extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.blue, Colors.blue.shade300],
+                  colors: [Colors.orange, Colors.orange.shade300],
                 ),
               ),
               child: Column(
@@ -49,9 +50,9 @@ class ProfileScreen extends StatelessWidget {
                     backgroundColor: Colors.white,
                     child: CircleAvatar(
                       radius: 55,
-                      backgroundColor: Colors.blue.shade700,
+                      backgroundColor: Colors.orange.shade700,
                       child: Text(
-                        nhanVien.hoTen.substring(0, 1).toUpperCase(),
+                        nhanVien.hoTen.isNotEmpty ? nhanVien.hoTen.substring(0, 1).toUpperCase() : '?',
                         style: const TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
@@ -111,6 +112,7 @@ class ProfileScreen extends StatelessWidget {
                   // Card thông tin
                   Card(
                     elevation: 2,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: Column(
                       children: [
                         _buildInfoTile(
@@ -119,21 +121,21 @@ class ProfileScreen extends StatelessWidget {
                           value: nhanVien.maNV?.toString() ?? 'N/A',
                           color: Colors.blue,
                         ),
-                        const Divider(height: 1),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
                         _buildInfoTile(
                           icon: Icons.email,
                           label: 'Email',
                           value: nhanVien.email,
                           color: Colors.orange,
                         ),
-                        const Divider(height: 1),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
                         _buildInfoTile(
                           icon: Icons.phone,
                           label: 'Số điện thoại',
                           value: nhanVien.dienThoai ?? 'Chưa cập nhật',
                           color: Colors.green,
                         ),
-                        const Divider(height: 1),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
                         _buildInfoTile(
                           icon: Icons.account_circle,
                           label: 'Tên đăng nhập',
@@ -141,7 +143,7 @@ class ProfileScreen extends StatelessWidget {
                           color: Colors.purple,
                         ),
                         if (nhanVien.theNFC != null && nhanVien.theNFC!.isNotEmpty) ...[
-                          const Divider(height: 1),
+                          const Divider(height: 1, indent: 16, endIndent: 16),
                           _buildInfoTile(
                             icon: Icons.credit_card,
                             label: 'Thẻ NFC',
@@ -149,7 +151,7 @@ class ProfileScreen extends StatelessWidget {
                             color: Colors.teal,
                           ),
                         ],
-                        const Divider(height: 1),
+                        const Divider(height: 1, indent: 16, endIndent: 16),
                         _buildInfoTile(
                           icon: Icons.calendar_today,
                           label: 'Ngày tạo',
@@ -159,62 +161,6 @@ class ProfileScreen extends StatelessWidget {
                           color: Colors.grey,
                         ),
                       ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Phần vai trò
-                  const Text(
-                    'Vai trò & Quyền hạn',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  Card(
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.admin_panel_settings,
-                                color: nhanVien.isAdmin ? Colors.red : Colors.blue,
-                                size: 32,
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      nhanVien.vaiTro?['tenVaiTro'] ?? 'Nhân viên',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      nhanVien.vaiTro?['moTa'] ?? 'Không có mô tả',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                     ),
                   ),
 
@@ -232,6 +178,8 @@ class ProfileScreen extends StatelessWidget {
 
                   Card(
                     elevation: 2,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    clipBehavior: Clip.antiAlias,
                     child: Column(
                       children: [
                         ListTile(
@@ -260,19 +208,6 @@ class ProfileScreen extends StatelessWidget {
                             );
                           },
                         ),
-                        const Divider(height: 1),
-                        ListTile(
-                          leading: const Icon(Icons.credit_card, color: Colors.teal),
-                          title: const Text('Quản lý thẻ NFC'),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Tính năng đang phát triển'),
-                              ),
-                            );
-                          },
-                        ),
                       ],
                     ),
                   ),
@@ -298,11 +233,9 @@ class ProfileScreen extends StatelessWidget {
                                 onPressed: () async {
                                   Navigator.pop(context);
                                   
-                                  // Xóa token và dữ liệu đăng nhập
                                   final authService = AuthService();
                                   await authService.logout();
                                   
-                                  // Xóa toàn bộ navigation stack và chuyển về login
                                   if (context.mounted) {
                                     Navigator.pushNamedAndRemoveUntil(
                                       context, 
