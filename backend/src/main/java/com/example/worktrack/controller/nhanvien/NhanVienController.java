@@ -308,8 +308,11 @@ public class NhanVienController {
      */
     @PutMapping("/change-password")
     @Operation(summary = "Đổi mật khẩu nhân viên")
-    public ResponseEntity<?> changePassword(@RequestParam String tenDangNhap, @RequestParam String oldPassword,
-            @RequestParam String newPassword) {
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> request) {
+        String tenDangNhap = request.get("tenDangNhap");
+        String oldPassword = request.get("oldPassword");
+        String newPassword = request.get("newPassword");
+
         Optional<NhanVien> nhanVienOpt = nhanVienService.getNhanVienByTenDangNhap(tenDangNhap);
 
         if (nhanVienOpt.isPresent()) {
