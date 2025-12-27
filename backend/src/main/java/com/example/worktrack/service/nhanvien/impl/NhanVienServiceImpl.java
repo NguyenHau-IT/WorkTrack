@@ -3,6 +3,7 @@ package com.example.worktrack.service.nhanvien.impl;
 import com.example.worktrack.model.nhanvien.NhanVien;
 import com.example.worktrack.repository.nhanvien.NhanVienRepository;
 import com.example.worktrack.service.nhanvien.NhanVienService;
+import com.example.worktrack.util.RoleUtil;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,16 @@ public class NhanVienServiceImpl implements NhanVienService {
     @Override
     @Transactional(readOnly = true)
     public List<NhanVien> getAllNhanVien() {
-        return nhanVienRepository.findAll();
+        List<NhanVien> allNhanVien = nhanVienRepository.findAll();
+
+        // Chỉ admin mới được xem dữ liệu đã xóa mềm
+        if (!RoleUtil.canViewSoftDeletedData()) {
+            return allNhanVien.stream()
+                    .filter(nhanVien -> !Boolean.TRUE.equals(nhanVien.getDaXoa()))
+                    .toList();
+        }
+
+        return allNhanVien;
     }
 
     @Override

@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../model/vaitro/vai_tro.dart';
+import '../../model/nhanvien/nhan_vien.dart';
 import '../../services/vaitro/vai_tro_service.dart';
 import 'them_vai_tro_screen.dart';
 import 'sua_vai_tro_screen.dart';
 
 class DanhSachVaiTroScreen extends StatefulWidget {
-  const DanhSachVaiTroScreen({super.key});
+  final NhanVien? currentUser;
+  
+  const DanhSachVaiTroScreen({super.key, this.currentUser});
 
   @override
   State<DanhSachVaiTroScreen> createState() => _DanhSachVaiTroScreenState();
@@ -300,22 +303,25 @@ class _DanhSachVaiTroScreenState extends State<DanhSachVaiTroScreen> {
 
     // Lọc danh sách theo trạng thái daXoa
     final danhSachHienThi = _danhSachVaiTro.where((v) => _hienThiDaXoa ? v.daXoa == true : v.daXoa != true).toList();
+    
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            TextButton.icon(
-              icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
-              label: Text(_hienThiDaXoa ? 'Ẩn vai trò đã xóa' : 'Hiện vai trò đã xóa'),
-              onPressed: () {
-                setState(() {
-                  _hienThiDaXoa = !_hienThiDaXoa;
-                });
-              },
-            ),
-          ],
-        ),
+        // Chỉ admin mới thấy toggle "Hiện vai trò đã xóa"
+        if (widget.currentUser?.isAdmin == true)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
+                label: Text(_hienThiDaXoa ? 'Ẩn vai trò đã xóa' : 'Hiện vai trò đã xóa'),
+                onPressed: () {
+                  setState(() {
+                    _hienThiDaXoa = !_hienThiDaXoa;
+                  });
+                },
+              ),
+            ],
+          ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadDanhSach,

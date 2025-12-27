@@ -4,6 +4,7 @@ import com.example.worktrack.model.chamcong.ChamCong;
 import com.example.worktrack.repository.chamcong.ChamCongRepository;
 import com.example.worktrack.repository.nhanvien.NhanVienRepository;
 import com.example.worktrack.service.chamcong.ChamCongService;
+import com.example.worktrack.util.RoleUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,16 @@ public class ChamCongServiceImpl implements ChamCongService {
     @Override
     @Transactional(readOnly = true)
     public List<ChamCong> getAllChamCong() {
-        return chamCongRepository.findAll();
+        List<ChamCong> allChamCong = chamCongRepository.findAll();
+
+        // Chỉ admin mới được xem dữ liệu đã xóa mềm
+        if (!RoleUtil.canViewSoftDeletedData()) {
+            return allChamCong.stream()
+                    .filter(chamCong -> !Boolean.TRUE.equals(chamCong.getDaXoa()))
+                    .toList();
+        }
+
+        return allChamCong;
     }
 
     @Override

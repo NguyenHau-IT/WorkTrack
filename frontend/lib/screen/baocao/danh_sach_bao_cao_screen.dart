@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../services/baocao/bao_cao_service.dart';
 import '../../model/baocao/bao_cao.dart';
+import '../../model/nhanvien/nhan_vien.dart';
 import 'tao_bao_cao_screen.dart';
 import 'package:intl/intl.dart';
 
 class DanhSachBaoCaoScreen extends StatefulWidget {
-  const DanhSachBaoCaoScreen({super.key});
+  final NhanVien? currentUser;
+  
+  const DanhSachBaoCaoScreen({super.key, this.currentUser});
 
   @override
   State<DanhSachBaoCaoScreen> createState() => _DanhSachBaoCaoScreenState();
@@ -311,23 +314,25 @@ class _DanhSachBaoCaoScreenState extends State<DanhSachBaoCaoScreen> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton.icon(
-                icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
-                label: Text(_hienThiDaXoa ? 'Ẩn đã xóa' : 'Hiện đã xóa'),
-                onPressed: () {
-                  setState(() {
-                    _hienThiDaXoa = !_hienThiDaXoa;
-                  });
-                },
-              ),
-            ],
+        // Chỉ admin mới thấy toggle "Hiện đã xóa"
+        if (widget.currentUser?.isAdmin == true)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
+                  label: Text(_hienThiDaXoa ? 'Ẩn đã xóa' : 'Hiện đã xóa'),
+                  onPressed: () {
+                    setState(() {
+                      _hienThiDaXoa = !_hienThiDaXoa;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadDanhSach,
