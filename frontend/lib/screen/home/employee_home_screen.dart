@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 import '../../services/auth/auth_service.dart';
 import '../profile/profile_screen.dart';
-import '../cham_cong/doc_nfc_cham_cong_screen.dart';
+import '../cham_cong/employee_nfc_checkin_screen.dart';
 import '../baocao/employee_bao_cao_screen.dart';
 import '../auth/change_password_screen.dart';
 
@@ -235,7 +235,7 @@ class EmployeeHomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const DocNFCChamCongScreen(),
+                      builder: (context) => EmployeeNFCCheckinScreen(employee: employee),
                     ),
                   );
                 },

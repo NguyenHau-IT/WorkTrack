@@ -250,7 +250,9 @@ class _DanhSachChamCongScreenState extends State<DanhSachChamCongScreen> {
           children: [
             Icon(Icons.warning, color: Colors.red, size: 28),
             SizedBox(width: 8),
-            Text('Xác nhận xóa vĩnh viễn'),
+            Expanded(
+              child: Text('Xác nhận xóa vĩnh viễn'),
+            ),
           ],
         ),
         content: Column(
@@ -377,7 +379,9 @@ class _DanhSachChamCongScreenState extends State<DanhSachChamCongScreen> {
               children: [
                 const Icon(Icons.error_outline, color: Colors.red, size: 28),
                 const SizedBox(width: 8),
-                Text(errorMessage),
+                Expanded(
+                  child: Text(errorMessage),
+                ),
               ],
             ),
             content: Text(errorDetail),
