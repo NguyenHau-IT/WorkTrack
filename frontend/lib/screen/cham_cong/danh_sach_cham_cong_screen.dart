@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../model/chamcong/cham_cong.dart';
+import '../../model/nhanvien/nhan_vien.dart';
 import '../../services/chamcong/cham_cong_service.dart';
 import 'them_cham_cong_screen.dart';
 import 'cap_nhat_cham_cong_screen.dart';
 
 class DanhSachChamCongScreen extends StatefulWidget {
-  const DanhSachChamCongScreen({super.key});
+  final NhanVien? currentUser;
+  
+  const DanhSachChamCongScreen({super.key, this.currentUser});
 
   @override
   State<DanhSachChamCongScreen> createState() => _DanhSachChamCongScreenState();
@@ -526,15 +529,17 @@ class _DanhSachChamCongScreenState extends State<DanhSachChamCongScreen> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              TextButton.icon(
-                icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
-                label: Text(_hienThiDaXoa ? 'Ẩn đã xóa' : 'Hiện đã xóa'),
-                onPressed: () {
-                  setState(() {
-                    _hienThiDaXoa = !_hienThiDaXoa;
-                  });
-                },
-              ),
+              // Chỉ admin mới thấy toggle "Hiện đã xóa"
+              if (widget.currentUser?.isAdmin == true)
+                TextButton.icon(
+                  icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
+                  label: Text(_hienThiDaXoa ? 'Ẩn đã xóa' : 'Hiện đã xóa'),
+                  onPressed: () {
+                    setState(() {
+                      _hienThiDaXoa = !_hienThiDaXoa;
+                    });
+                  },
+                ),
             ],
           ),
         ),

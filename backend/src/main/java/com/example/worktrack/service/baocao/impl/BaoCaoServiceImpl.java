@@ -6,6 +6,7 @@ import com.example.worktrack.repository.baocao.BaoCaoRepository;
 import com.example.worktrack.repository.chamcong.ChamCongRepository;
 import com.example.worktrack.repository.nhanvien.NhanVienRepository;
 import com.example.worktrack.service.baocao.BaoCaoService;
+import com.example.worktrack.util.RoleUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +40,16 @@ public class BaoCaoServiceImpl implements BaoCaoService {
     @Override
     @Transactional(readOnly = true)
     public List<BaoCao> getAllBaoCao() {
-        return baoCaoRepository.findAll();
+        List<BaoCao> allBaoCao = baoCaoRepository.findAll();
+
+        // Chỉ admin mới được xem dữ liệu đã xóa mềm
+        if (!RoleUtil.canViewSoftDeletedData()) {
+            return allBaoCao.stream()
+                    .filter(baoCao -> !Boolean.TRUE.equals(baoCao.getDaXoa()))
+                    .toList();
+        }
+
+        return allBaoCao;
     }
 
     @Override

@@ -204,7 +204,7 @@ class AdminHomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const DanhSachVaiTroScreen(),
+                builder: (context) => DanhSachVaiTroScreen(currentUser: admin),
               ),
             );
           },
@@ -218,7 +218,7 @@ class AdminHomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const DanhSachChamCongScreen(),
+                builder: (context) => DanhSachChamCongScreen(currentUser: admin),
               ),
             );
           },
@@ -232,7 +232,7 @@ class AdminHomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const DanhSachCauHinhLuongScreen(),
+                builder: (context) => DanhSachCauHinhLuongScreen(currentUser: admin),
               ),
             );
           },
@@ -258,7 +258,7 @@ class AdminHomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => const DanhSachBaoCaoScreen(),
+                builder: (context) => DanhSachBaoCaoScreen(currentUser: admin),
               ),
             );
           },

@@ -3,6 +3,7 @@ package com.example.worktrack.service.vaitro.impl;
 import com.example.worktrack.model.vaitro.VaiTro;
 import com.example.worktrack.repository.vaitro.VaiTroRepository;
 import com.example.worktrack.service.vaitro.VaiTroService;
+import com.example.worktrack.util.RoleUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,16 @@ public class VaiTroServiceImpl implements VaiTroService {
     @Override
     @Transactional(readOnly = true)
     public List<VaiTro> getAllVaiTro() {
-        return vaiTroRepository.findAll();
+        List<VaiTro> allVaiTro = vaiTroRepository.findAll();
+
+        // Chỉ admin mới được xem dữ liệu đã xóa mềm
+        if (!RoleUtil.canViewSoftDeletedData()) {
+            return allVaiTro.stream()
+                    .filter(vaiTro -> !Boolean.TRUE.equals(vaiTro.getDaXoa()))
+                    .toList();
+        }
+
+        return allVaiTro;
     }
 
     // lấy tất cả vai trò chưa bị xóa

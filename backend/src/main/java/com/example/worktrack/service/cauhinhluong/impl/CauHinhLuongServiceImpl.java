@@ -3,6 +3,7 @@ package com.example.worktrack.service.cauhinhluong.impl;
 import com.example.worktrack.model.cauhinhluong.CauHinhLuong;
 import com.example.worktrack.repository.cauhinhluong.CauHinhLuongRepository;
 import com.example.worktrack.service.cauhinhluong.CauHinhLuongService;
+import com.example.worktrack.util.RoleUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +21,16 @@ public class CauHinhLuongServiceImpl implements CauHinhLuongService {
     @Override
     @Transactional(readOnly = true)
     public List<CauHinhLuong> getAllCauHinhLuong() {
-        return cauHinhLuongRepository.findAll();
+        List<CauHinhLuong> allCauHinhLuong = cauHinhLuongRepository.findAll();
+
+        // Chỉ admin mới được xem dữ liệu đã xóa mềm
+        if (!RoleUtil.canViewSoftDeletedData()) {
+            return allCauHinhLuong.stream()
+                    .filter(cauHinhLuong -> !Boolean.TRUE.equals(cauHinhLuong.getDaXoa()))
+                    .toList();
+        }
+
+        return allCauHinhLuong;
     }
 
     @Override
