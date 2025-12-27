@@ -36,9 +36,9 @@ class ChamCongService {
 
   /// Lấy chấm công theo khoảng thời gian
   Future<List<ChamCong>> getChamCongByDateRange(DateTime startDate, DateTime endDate) async {
-    final startStr = startDate.toIso8601String().split('T')[0];
-    final endStr = endDate.toIso8601String().split('T')[0];
-    final response = await _apiService.get('$endpoint/range?startDate=$startStr&endDate=$endStr');
+    final startStr = startDate.toIso8601String();
+    final endStr = endDate.toIso8601String();
+    final response = await _apiService.get('$endpoint/daterange?tuNgay=$startStr&denNgay=$endStr');
     final List<dynamic> data = json.decode(response.body);
     return data.map((json) => ChamCong.fromJson(json)).toList();
   }

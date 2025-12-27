@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 import '../../services/auth/auth_service.dart';
+import '../auth/change_password_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   final NhanVien nhanVien;
@@ -187,9 +188,10 @@ class ProfileScreen extends StatelessWidget {
                           title: const Text('Đổi mật khẩu'),
                           trailing: const Icon(Icons.chevron_right),
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Tính năng đang phát triển'),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChangePasswordScreen(employee: nhanVien),
                               ),
                             );
                           },

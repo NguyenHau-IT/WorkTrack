@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 import '../../services/auth/auth_service.dart';
 import '../profile/profile_screen.dart';
-import '../cham_cong/doc_nfc_cham_cong_screen.dart';
+import '../cham_cong/employee_nfc_checkin_screen.dart';
+import '../baocao/employee_bao_cao_screen.dart';
+import '../auth/change_password_screen.dart';
 
 class EmployeeHomeScreen extends StatelessWidget {
   final NhanVien employee;
@@ -147,9 +149,11 @@ class EmployeeHomeScreen extends StatelessWidget {
           title: 'Xem báo cáo',
           color: Colors.green,
           onTap: () {
-            // TODO: Điều hướng đến màn hình báo cáo
-             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Chức năng Báo cáo sắp ra mắt!')),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EmployeeBaoCaoScreen(employee: employee),
+              ),
             );
           },
         ),
@@ -173,10 +177,7 @@ class EmployeeHomeScreen extends StatelessWidget {
           title: 'Đổi mật khẩu',
           color: Colors.red,
           onTap: () {
-             // TODO: Điều hướng đến màn hình đổi mật khẩu
-             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Chức năng Đổi mật khẩu sắp ra mắt!')),
-            );
+            _showChangePasswordConfirmation(context);
           },
         ),
       ],
@@ -234,7 +235,7 @@ class EmployeeHomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const DocNFCChamCongScreen(),
+                      builder: (context) => EmployeeNFCCheckinScreen(employee: employee),
                     ),
                   );
                 },
@@ -242,6 +243,88 @@ class EmployeeHomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  // Hiển thị dialog xác nhận trước khi đổi mật khẩu
+  void _showChangePasswordConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          icon: Icon(
+            Icons.security,
+            color: Colors.red.shade600,
+            size: 48,
+          ),
+          title: const Text(
+            'Đổi mật khẩu',
+            textAlign: TextAlign.center,
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Bạn có muốn đổi mật khẩu cho tài khoản',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  employee.tenDangNhap,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'không?',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Hủy',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChangePasswordScreen(employee: employee),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Đổi mật khẩu'),
+            ),
+          ],
         );
       },
     );

@@ -309,23 +309,25 @@ class _DanhSachNhanVienScreenState extends State<DanhSachNhanVienScreen> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton.icon(
-                icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
-                label: Text(_hienThiDaXoa ? 'Ẩn nhân viên đã xóa' : 'Hiện nhân viên đã xóa'),
-                onPressed: () {
-                  setState(() {
-                    _hienThiDaXoa = !_hienThiDaXoa;
-                  });
-                },
-              ),
-            ],
+        // Chỉ admin mới thấy toggle "Hiện nhân viên đã xóa"
+        if (widget.currentUser?.isAdmin == true)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  icon: Icon(_hienThiDaXoa ? Icons.visibility : Icons.visibility_off),
+                  label: Text(_hienThiDaXoa ? 'Ẩn nhân viên đã xóa' : 'Hiện nhân viên đã xóa'),
+                  onPressed: () {
+                    setState(() {
+                      _hienThiDaXoa = !_hienThiDaXoa;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadDanhSach,

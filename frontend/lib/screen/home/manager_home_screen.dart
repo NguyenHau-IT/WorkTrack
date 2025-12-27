@@ -1,16 +1,88 @@
 import 'package:flutter/material.dart';
 import '../../model/nhanvien/nhan_vien.dart';
 import '../../services/auth/auth_service.dart';
+import '../../services/nhan_vien/nhan_vien_service.dart';
+import '../../services/chamcong/cham_cong_service.dart';
+import '../../services/baocao/bao_cao_service.dart';
 import '../profile/profile_screen.dart';
 import '../nhan_vien/danh_sach_nhan_vien_screen.dart';
 import '../cham_cong/danh_sach_cham_cong_screen.dart';
 import '../cham_cong/doc_nfc_cham_cong_screen.dart';
 import '../baocao/danh_sach_bao_cao_screen.dart';
 
-class ManagerHomeScreen extends StatelessWidget {
+class ManagerHomeScreen extends StatefulWidget {
   final NhanVien manager;
 
   const ManagerHomeScreen({super.key, required this.manager});
+
+  @override
+  State<ManagerHomeScreen> createState() => _ManagerHomeScreenState();
+}
+
+class _ManagerHomeScreenState extends State<ManagerHomeScreen> {
+  final NhanVienService _nhanVienService = NhanVienService();
+  final ChamCongService _chamCongService = ChamCongService();
+  final BaoCaoService _baoCaoService = BaoCaoService();
+  
+  int _totalEmployees = 0;
+  int _presentEmployees = 0;
+  int _absentEmployees = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Lấy danh sách nhân viên
+      final employees = await _nhanVienService.getAllNhanVien();
+      final activeEmployees = employees.where((emp) => !emp.daXoa).toList();
+      
+      // Lấy dữ liệu chấm công hôm nay
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
+      final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
+      
+      final todayChamCong = await _chamCongService.getChamCongByDateRange(startOfDay, endOfDay);
+      
+      // Tính toán số liệu
+      final presentEmployeeIds = todayChamCong
+          .where((cc) => cc.gioVao != null && !cc.daXoa)
+          .map((cc) => cc.maNV)
+          .toSet();
+      
+      setState(() {
+        _totalEmployees = activeEmployees.length;
+        _presentEmployees = presentEmployeeIds.length;
+        _absentEmployees = _totalEmployees - _presentEmployees;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        // Giữ giá trị mặc định nếu có lỗi
+        _totalEmployees = 0;
+        _presentEmployees = 0;
+        _absentEmployees = 0;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi tải dữ liệu dashboard: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +120,7 @@ class ManagerHomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manager Dashboard - ${manager.hoTen}'),
+        title: Text('Manager Dashboard - ${widget.manager.hoTen}'),
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
         actions: [
@@ -60,7 +132,7 @@ class ManagerHomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProfileScreen(nhanVien: manager),
+                    builder: (context) => ProfileScreen(nhanVien: widget.manager),
                   ),
                 );
               },
@@ -68,7 +140,7 @@ class ManagerHomeScreen extends StatelessWidget {
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.indigo,
                 child: Text(
-                  manager.hoTen.isNotEmpty ? manager.hoTen.substring(0, 1).toUpperCase() : 'M',
+                  widget.manager.hoTen.isNotEmpty ? widget.manager.hoTen.substring(0, 1).toUpperCase() : 'M',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
@@ -78,6 +150,11 @@ class ManagerHomeScreen extends StatelessWidget {
             icon: const Icon(Icons.logout),
             tooltip: 'Đăng xuất',
             onPressed: _logout,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Làm mới dữ liệu',
+            onPressed: _loadDashboardData,
           ),
         ],
       ),
@@ -145,7 +222,7 @@ class ManagerHomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Chào mừng, ${manager.hoTen}!',
+                        'Chào mừng, ${widget.manager.hoTen}!',
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -171,14 +248,23 @@ class ManagerHomeScreen extends StatelessWidget {
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStatItem('Nhân viên', '24'),
-                  _buildStatItem('Có mặt', '20'),
-                  _buildStatItem('Nghỉ phép', '4'),
-                ],
-              ),
+              child: _isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildStatItem('Nhân viên', '$_totalEmployees'),
+                        _buildStatItem('Có mặt', '$_presentEmployees'),
+                        _buildStatItem('Vắng mặt', '$_absentEmployees'),
+                      ],
+                    ),
             ),
           ],
         ),
@@ -225,7 +311,7 @@ class ManagerHomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => DanhSachNhanVienScreen(currentUser: manager),
+                builder: (context) => DanhSachNhanVienScreen(currentUser: widget.manager),
               ),
             );
           },
@@ -360,7 +446,7 @@ class ManagerHomeScreen extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProfileScreen(nhanVien: manager),
+                builder: (context) => ProfileScreen(nhanVien: widget.manager),
               ),
             );
           },
